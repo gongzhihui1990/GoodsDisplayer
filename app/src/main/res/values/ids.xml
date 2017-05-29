@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="tv_hint_common" type="integer"/>
+    <item name="list_common" type="integer"/>
+</resources>
