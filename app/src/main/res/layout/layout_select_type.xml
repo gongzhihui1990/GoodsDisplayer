@@ -3,10 +3,14 @@
     android:id="@+id/pop_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
+    android:background="@android:color/transparent"
     android:orientation="vertical">
 
     <android.support.v7.widget.RecyclerView
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="32dp"
         android:id="@+id/list_spu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>

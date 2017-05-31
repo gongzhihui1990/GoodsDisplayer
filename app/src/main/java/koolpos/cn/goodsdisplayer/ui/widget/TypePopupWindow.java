@@ -58,7 +58,7 @@ public class TypePopupWindow extends PopupWindow {
 
             public boolean onTouch(View v, MotionEvent event) {
 
-                int height = view.findViewById(R.id.pop_layout).getTop();
+                int height = view.findViewById(R.id.list_spu).getTop();
 
                 int y = (int) event.getY();
                 if (event.getAction() == MotionEvent.ACTION_UP) {
