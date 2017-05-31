@@ -3,6 +3,7 @@ package koolpos.cn.goodsdisplayer.ui.widget;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -38,9 +39,11 @@ public class TypePopupWindow extends PopupWindow {
 
         this.view = LayoutInflater.from(mContext).inflate(R.layout.layout_select_type, null);
         listSPU = (RecyclerView) this.view.findViewById(R.id.list_spu);
-        GridLayoutManager titleLayoutManager = new GridLayoutManager(mContext,1);
-        titleLayoutManager.setOrientation(GridLayoutManager.HORIZONTAL);
+        LinearLayoutManager titleLayoutManager = new LinearLayoutManager(mContext);
+        titleLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        SpacesItemDecoration itemDecoration =new SpacesItemDecoration(10);
         listSPU.setLayoutManager(titleLayoutManager);
+        listSPU.addItemDecoration(itemDecoration);
         OnSPUSelectedListener onSPUSelectedListener =new OnSPUSelectedListener() {
             @Override
             public void onSelected(GoodType type) {
@@ -82,7 +85,7 @@ public class TypePopupWindow extends PopupWindow {
         this.setFocusable(true);
 
         // 实例化一个ColorDrawable颜色为半透明
-        ColorDrawable dw = new ColorDrawable(0xb0000000);
+        ColorDrawable dw = new ColorDrawable(0x66000000);
         // 设置弹出窗体的背景
         this.setBackgroundDrawable(dw);
 
