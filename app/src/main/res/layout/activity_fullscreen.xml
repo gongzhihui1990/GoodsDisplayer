@@ -2,15 +2,28 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
+    android:background="@drawable/main_bg"
     android:orientation="horizontal"
     android:id="@+id/main_view"
     tools:context="koolpos.cn.goodsdisplayer.ui.activity.DisplayActivity">
 
     <RelativeLayout
+        android:layout_height="wrap_content"
+        android:layout_weight="13"
+        android:layout_width="match_parent">
+        <TextView
+            android:textColor="@color/title_head_color"
+            android:textSize="@dimen/title_head_text_size"
+            android:text="@string/title_display_screen"
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </RelativeLayout>
+    <RelativeLayout
+        android:padding="@dimen/activity_vertical_margin"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="8">
+        android:layout_weight="81">
 
         <TextView
             android:id="@+id/tv_hint_common"
