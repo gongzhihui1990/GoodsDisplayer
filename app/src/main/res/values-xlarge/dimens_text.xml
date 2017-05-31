@@ -1,0 +1,8 @@
+<resources>
+
+    <dimen name="small_text_size">24sp</dimen>
+    <dimen name="middle_text_size">42sp</dimen>
+    <dimen name="big_text_size">54sp</dimen>
+    <dimen name="title_head_text_size">42sp</dimen>
+
+</resources>

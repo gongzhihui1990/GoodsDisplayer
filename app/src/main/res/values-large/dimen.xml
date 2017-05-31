@@ -2,4 +2,6 @@
 <resources>
     <dimen name="imgW">196dp</dimen>
     <dimen name="imgH">144dp</dimen>
+    <dimen name="padding_small">32dp</dimen>
+
 </resources>
