@@ -14,12 +14,15 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Interpolator;
+import android.widget.PopupWindow;
 import android.widget.Scroller;
 import android.widget.TextView;
 
@@ -49,6 +52,7 @@ import koolpos.cn.goodsdisplayer.mvcModel.Goods;
 import koolpos.cn.goodsdisplayer.ui.fragment.DisplayGoodGroupFragment;
 import koolpos.cn.goodsdisplayer.ui.widget.BounceBackViewPager;
 import koolpos.cn.goodsdisplayer.ui.widget.FixedSpeedScroller;
+import koolpos.cn.goodsdisplayer.ui.widget.TypePopupWindow;
 import koolpos.cn.goodsdisplayer.util.AndroidUtils;
 import koolpos.cn.goodsdisplayer.util.Loger;
 
@@ -60,11 +64,14 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
 
     @BindView(R.id.grid_content)
     BounceBackViewPager gridContent;
-    @BindView(R.id.list_content_title)
-    RecyclerView listContentTitle;
+//    @BindView(R.id.list_content_title)
+//    RecyclerView listContentTitle;
+    @BindView(R.id.select_type)
+    TextView tvSelectType;
     private ViewPagerAdapter gridAdapter;
-    private GoodTypeAdapter typeAdapter;
+//    private GoodTypeAdapter typeAdapter;
 
+    private GoodType selectType;
     private AidlApi aidlApi;
     private IGPService gpService;
     ServiceConnection connection =new ServiceConnection() {
@@ -76,7 +83,23 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
                 JSONObject request=new JSONObject();
                 request.put("action","local/get/getTypeList");
                 String response =gpService.proxyPost(request.toString());
-                typeAdapter.setData(aidlApi.getTypeList());
+//                typeAdapter.setData(aidlApi.getTypeList());
+                final List<GoodType> datas =aidlApi.getTypeList();
+                tvSelectType.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        TypePopupWindow.OnSPUSelectedListener spuSelectedListener=new TypePopupWindow.OnSPUSelectedListener() {
+                            @Override
+                            public void onSelected(GoodType type) {
+                                Loger.d("type=="+type.getTypeName());
+                                gridAdapter.setDataByType(type.getTypeName());
+                            }
+                        };
+                        showPopFormBottom(datas,selectType,spuSelectedListener);
+                    }
+                });
+               ;
+
             } catch (RemoteException e) {
                 e.printStackTrace();
             } catch (JSONException e) {
@@ -86,16 +109,34 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-
         }
     };
 
+    private WindowManager.LayoutParams params;
+    private void showPopFormBottom(List<GoodType> data, GoodType goodType, TypePopupWindow.OnSPUSelectedListener spuSelectedListener){
+        TypePopupWindow popupWindow=new TypePopupWindow(getBaseContext(),data,spuSelectedListener);
+        popupWindow.showAtLocation(findViewById(R.id.main_view), Gravity.BOTTOM|Gravity.CENTER_HORIZONTAL, 0, 0);
+        params = getWindow().getAttributes();
+        //当弹出Popupwindow时，背景变半透明
+        params.alpha=0.7f;
+        getWindow().setAttributes(params);
+        //设置Popupwindow关闭监听，当Popupwindow关闭，背景恢复1f
+        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                params = getWindow().getAttributes();
+                params.alpha=1f;
+                getWindow().setAttributes(params);
+            }
+        });
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fullscreen);
         gridAdapter =new ViewPagerAdapter(getSupportFragmentManager());
-        typeAdapter =new GoodTypeAdapter(gridAdapter);
+
+//        typeAdapter =new GoodTypeAdapter(gridAdapter);
         //Content布局
         //TODO
         gridContent.setAdapter(gridAdapter);
@@ -139,15 +180,13 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
             }
         });
         //Title布局
-        GridLayoutManager titleLayoutManager = new GridLayoutManager(this,1);
-        titleLayoutManager.setOrientation(GridLayoutManager.VERTICAL);
-        listContentTitle.setLayoutManager(titleLayoutManager);
-        listContentTitle.setAdapter(typeAdapter);
+//        GridLayoutManager titleLayoutManager = new GridLayoutManager(this,1);
+//        titleLayoutManager.setOrientation(GridLayoutManager.VERTICAL);
+//        listContentTitle.setLayoutManager(titleLayoutManager);
+//        listContentTitle.setAdapter(typeAdapter);
         Intent serviceIntent=new Intent(IGPService.class.getName());
         serviceIntent= AndroidUtils.getExplicitIntent(getBaseContext(),serviceIntent);
-        //serviceIntent.setPackage("koolpos.cn.goodproviderservice");//这里你需要设置你应用的包名
         boolean bindService=bindService(serviceIntent,connection, Context.BIND_AUTO_CREATE);
-        Loger.d("bindService "+bindService);
         start();
         gridContent.setOnTouchListener(new View.OnTouchListener() {
             @Override

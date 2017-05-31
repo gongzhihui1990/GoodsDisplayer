@@ -4,6 +4,7 @@
     android:layout_height="match_parent"
     android:background="@android:color/white"
     android:orientation="horizontal"
+    android:id="@+id/main_view"
     tools:context="koolpos.cn.goodsdisplayer.ui.activity.DisplayActivity">
 
     <RelativeLayout
@@ -21,9 +22,20 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
 
+        <TextView
+            android:textColor="@android:color/black"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:text="@string/select_type"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:id="@+id/select_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     </RelativeLayout>
 
     <RelativeLayout
+        android:visibility="gone"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="2">
@@ -32,8 +44,7 @@
             android:id="@+id/list_content_title"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
+
     </RelativeLayout>
-
-
 
 </LinearLayout>

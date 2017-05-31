@@ -1,6 +1,9 @@
 package koolpos.cn.goodsdisplayer.ui.fragment;
 
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -18,12 +21,14 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
+import java.io.ByteArrayOutputStream;
 import java.security.NoSuchAlgorithmException;
 
 import butterknife.BindView;
 import koolpos.cn.goodsdisplayer.MyApplication;
 import koolpos.cn.goodsdisplayer.R;
 import koolpos.cn.goodsdisplayer.mvcModel.Goods;
+import koolpos.cn.goodsdisplayer.ui.activity.ShowDetailActivity;
 import koolpos.cn.goodsdisplayer.util.FileUtil;
 import koolpos.cn.goodsdisplayer.util.Loger;
 
@@ -73,7 +78,7 @@ public class DisplayGoodGroupFragment extends BaseFragment {
         return super.onCreateView(inflater, (ViewGroup) inflater.inflate(R.layout.fragment_display_good_detial, container, false), savedInstanceState);
     }
 
-    private void render(View itemView, Goods itemGood) {
+    private void render(View itemView, final Goods itemGood) {
         TextView good_name = (TextView) itemView.findViewById(R.id.good_name);
         ImageView good_img= (ImageView) itemView.findViewById(R.id.good_img);
         try {
@@ -83,12 +88,32 @@ public class DisplayGoodGroupFragment extends BaseFragment {
     //               .load(itemGood.getImage_url())
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .placeholder(R.mipmap.downloading)
+                    .animate(R.anim.zoom_in)
                     .error(R.mipmap.download_error)
                     .into(good_img);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
         good_name.setText(itemGood.getGoods_name());
+        itemView.setClickable(true);
+        itemView.setEnabled(true);
+        itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Loger.d("onClick");
+                Intent intent =new Intent(getContext(), ShowDetailActivity.class);
+                intent.putExtra(Goods.class.getName(),itemGood);
+                Bitmap cacheBmp = Bitmap.createBitmap(getActivity().getWindow().getDecorView().getWidth(), getActivity().getWindow().getDecorView().getHeight(), Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(cacheBmp);
+                getActivity().getWindow().getDecorView().draw(canvas);
+                MyApplication.CacheBitmap=cacheBmp;
+//                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//                cacheBmp.compress(Bitmap.CompressFormat.PNG, 100, baos);
+//                byte[] bitmapByte = baos.toByteArray();
+//                intent.putExtra(Bitmap.class.getName(), bitmapByte);
+                getActivity().startActivity(intent);
+            }
+        });
     }
 
     @Override
