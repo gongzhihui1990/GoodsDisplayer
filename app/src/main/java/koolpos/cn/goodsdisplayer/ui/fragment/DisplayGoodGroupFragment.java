@@ -107,10 +107,6 @@ public class DisplayGoodGroupFragment extends BaseFragment {
                 Canvas canvas = new Canvas(cacheBmp);
                 getActivity().getWindow().getDecorView().draw(canvas);
                 MyApplication.CacheBitmap=cacheBmp;
-//                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-//                cacheBmp.compress(Bitmap.CompressFormat.PNG, 100, baos);
-//                byte[] bitmapByte = baos.toByteArray();
-//                intent.putExtra(Bitmap.class.getName(), bitmapByte);
                 getActivity().startActivity(intent);
             }
         });

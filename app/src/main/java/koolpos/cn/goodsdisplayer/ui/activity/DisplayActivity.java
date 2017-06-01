@@ -12,6 +12,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -46,11 +47,15 @@ import koolpos.cn.goodproviderservice.service.aidl.IGPService;
 import koolpos.cn.goodsdisplayer.MyApplication;
 import koolpos.cn.goodsdisplayer.R;
 import koolpos.cn.goodsdisplayer.api.AidlApi;
+import koolpos.cn.goodsdisplayer.api.SkuTypeManger;
 import koolpos.cn.goodsdisplayer.mvcModel.GoodType;
 import koolpos.cn.goodsdisplayer.mvcModel.Goods;
+import koolpos.cn.goodsdisplayer.ui.adapter.DisplaySkuAdapter;
 import koolpos.cn.goodsdisplayer.ui.fragment.DisplayGoodGroupFragment;
 import koolpos.cn.goodsdisplayer.ui.widget.BounceBackViewPager;
+import koolpos.cn.goodsdisplayer.ui.widget.DividerGridItemDecoration;
 import koolpos.cn.goodsdisplayer.ui.widget.FixedSpeedScroller;
+import koolpos.cn.goodsdisplayer.ui.widget.GridSpacingItemDecoration;
 import koolpos.cn.goodsdisplayer.ui.widget.TypePopupWindow;
 import koolpos.cn.goodsdisplayer.util.AndroidUtils;
 import koolpos.cn.goodsdisplayer.util.Loger;
@@ -62,16 +67,10 @@ import koolpos.cn.goodsdisplayer.util.Loger;
 public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFragment.OnFragmentInteractionListener {
 
     @BindView(R.id.grid_content)
-    BounceBackViewPager gridContent;
-    //    @BindView(R.id.list_content_title)
-//    RecyclerView listContentTitle;
+    RecyclerView gridContentView;
     @BindView(R.id.select_type)
     TextView tvSelectType;
-    private ViewPagerAdapter gridAdapter;
-//    private GoodTypeAdapter typeAdapter;
-
     private AidlApi aidlApi;
-    //    private GoodType selectType;
     /**
      * 当前分类标记位
      */
@@ -85,10 +84,15 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             IGPService gpService = IGPService.Stub.asInterface(iBinder);
             aidlApi = new AidlApi(gpService);
+            final DisplaySkuAdapter gridAdapter=new DisplaySkuAdapter(aidlApi);
+            GridSpacingItemDecoration dividerGridItemDecoration =new GridSpacingItemDecoration(Integer.MAX_VALUE,20,true);
+            gridContentView.addItemDecoration(dividerGridItemDecoration);
+            gridContentView.setAdapter(gridAdapter);
             try {
                 types = aidlApi.getTypeList();
                 if (selectedIndex == -1) {
                     selectedIndex = 0;
+                    gridAdapter.setType(types.get(0).getTypeName());
                 }
                 tvSelectType.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -98,7 +102,7 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
                             public void onSelected(/*GoodType type,*/int index) {
                                 selectedIndex = index;
                                 GoodType type = types.get(selectedIndex);
-                                gridAdapter.setDataByType(type.getTypeName());
+                                gridAdapter.setType(type.getTypeName());
                             }
                         };
                         showPopFormBottom(types, selectedIndex, spuSelectedListener);
@@ -138,61 +142,18 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fullscreen);
-        gridAdapter = new ViewPagerAdapter(getSupportFragmentManager());
-
-//        typeAdapter =new GoodTypeAdapter(gridAdapter);
-        //Content布局
-        //TODO
-        gridContent.setAdapter(gridAdapter);
         Glide.with(MyApplication.getContext()).resumeRequests();
-        gridContent.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                if (0 == position && 0 == positionOffsetPixels && 0 == positionOffsetPixels) {
-                    Glide.with(DisplayActivity.this).resumeRequests();
-                } else {
-                    Glide.with(DisplayActivity.this).pauseRequests();
-                }
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-                Loger.d("onPageSelected");
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-                Loger.d("onPageScrollStateChanged");
-                Glide.with(DisplayActivity.this).resumeRequests();
-                switch (state) {
-                    // 闲置中
-                    case ViewPager.SCROLL_STATE_IDLE:
-                        // “偷梁换柱”
-//                        if (gridContent.getCurrentItem() == 0) {
-//                            gridContent.setCurrentItem(gridAdapter.getCount()-1, false);
-//                        } else if (gridContent.getCurrentItem() == gridAdapter.getCount()) {
-//                            gridContent.setCurrentItem(1, false);
-//                        }
-                        if (gridContent.getCurrentItem() == 0) {
-                            gridContent.setCurrentItem(gridAdapter.getCount() - 1, false);
-                        } else if (gridContent.getCurrentItem() == gridAdapter.getCount() - 1) {
-                            gridContent.setCurrentItem(1, false);
-                        }
-                        mCurrentPage = gridContent.getCurrentItem();
-                        break;
-                }
-            }
-        });
-        //Title布局
+             //Title布局
 //        GridLayoutManager titleLayoutManager = new GridLayoutManager(this,1);
 //        titleLayoutManager.setOrientation(GridLayoutManager.VERTICAL);
 //        listContentTitle.setLayoutManager(titleLayoutManager);
 //        listContentTitle.setAdapter(typeAdapter);
+        gridContentView.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.HORIZONTAL));
         Intent serviceIntent = new Intent(IGPService.class.getName());
         serviceIntent = AndroidUtils.getExplicitIntent(getBaseContext(), serviceIntent);
         boolean bindService = bindService(serviceIntent, connection, Context.BIND_AUTO_CREATE);
         start();
-        gridContent.setOnTouchListener(new View.OnTouchListener() {
+        gridContentView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 //监听ViewPager的触摸事件，当用户按下的时候取消注册，当用户手抬起的时候再注册
@@ -234,208 +195,29 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
     };
     private boolean stateStop = true;
 
-    private void controlViewPagerSpeedStop() {
-        if (stateStop) {
-            return;
-        }
-        stateStop = true;
-        try {
-            Field mField;
-            mField = ViewPager.class.getDeclaredField("mScroller");
-            mField.setAccessible(true);
-            Scroller mScroller = new Scroller(getBaseContext(), sInterpolator);
-            mField.set(gridContent, mScroller);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    //设置滚动速度
-    private void controlViewPagerSpeed() {
-        if (!stateStop) {
-            return;
-        }
-        stateStop = false;
-        try {
-            Field mField;
-            mField = ViewPager.class.getDeclaredField("mScroller");
-            mField.setAccessible(true);
-            FixedSpeedScroller mScroller = new FixedSpeedScroller(getBaseContext(),
-                    new AccelerateInterpolator());
-            mScroller.setmDuration(1500); // 1000ms
-            mField.set(gridContent, mScroller);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     //开始轮播
     public void start() {
-        mViewPagerSubscribe = Observable.interval(3, 3, TimeUnit.SECONDS)
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<Long>() {
-                    @Override
-                    public void accept(@NonNull Long aLong) throws Exception {
-                        controlViewPagerSpeed();
-                        if (gridAdapter.getData() != null && gridAdapter.getData().size() > 0 && isAutoPlay) {
-                            mCurrentPage++;
-                            gridContent.setCurrentItem(mCurrentPage);
-                        }
-                    }
-                });
     }
 
     //重新轮播
     public void reStart() {
-        mViewPagerSubscribe = Observable.interval(6, 3, TimeUnit.SECONDS)
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<Long>() {
-                    @Override
-                    public void accept(@NonNull Long aLong) throws Exception {
-                        controlViewPagerSpeed();
-                        if (gridAdapter.getData() != null && gridAdapter.getData().size() > 1 && isAutoPlay) {
-                            mCurrentPage++;
-                            gridContent.setCurrentItem(mCurrentPage);
-                        }
-                    }
-                });
     }
 
     //结束、暂停轮播
     public void stop() {
-        controlViewPagerSpeedStop();
-        if (!mViewPagerSubscribe.isDisposed()) {
-            mViewPagerSubscribe.dispose();
-        }
     }
 
-    class ViewPagerAdapter extends FragmentStatePagerAdapter {
 
-        private final int GroupSize = 20;
-
-        List<Goods[]> goodsGroup = new ArrayList<>();
-
-        public List<Goods[]> getData() {
-            return goodsGroup;
-        }
-
-        public ViewPagerAdapter(FragmentManager supportFragmentManager) {
-            super(supportFragmentManager);
-        }
-
-        @Override
-        public int getCount() {
-            if (goodsGroup != null && goodsGroup.size() >= 2) {
-                return goodsGroup.size() + 2;
-            }
-
-            if (goodsGroup != null && goodsGroup.size() == 1) {
-                return 1;
-            }
-
-            return 0;
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            Goods[] goods = null;
-
-            if (getCount() == 1) {
-                goods = goodsGroup.get(position);
-            } else {
-                if (position == 0) {// 将最前面一页设置成本来最后的那页
-                    goods = goodsGroup.get(getData().size() - 1);
-                } else if (position == getData().size() + 1) {// 将最后面一页设置成本来最前的那页
-                    goods = goodsGroup.get(0);
-                } else {
-                    goods = goodsGroup.get(position - 1);
-                }
-            }
-            DisplayGoodGroupFragment fragment = DisplayGoodGroupFragment.newInstance(goods);
-            return fragment;
-        }
-
-        @Override
-        public int getItemPosition(Object object) {
-            return POSITION_NONE;
-        }
-
-        public void setDataByType(String type) {
-            Observable.just(type)
-                    .map(new Function<String, List<Goods>>() {
-                        @Override
-                        public List<Goods> apply(@NonNull String type) throws Exception {
-                            List<Goods> dataList = aidlApi.getListByType(type);
-                            return dataList;
-                        }
-                    })
-                    .map(new Function<List<Goods>, List<Goods[]>>() {
-                        @Override
-                        public List<Goods[]> apply(@NonNull List<Goods> dataList) throws Exception {
-                            List<Goods[]> goodsGroupTmp = new ArrayList<Goods[]>();
-                            Loger.d("dataList size:" + dataList.size());
-                            int dataListSizeNow = dataList.size();
-                            int index = 0;
-                            //新建数组的大小
-                            int itemSize = dataListSizeNow < GroupSize ? dataListSizeNow : GroupSize;
-                            Loger.d("初始单页的大小:" + itemSize);
-                            Goods[] group = new Goods[itemSize];
-                            for (Goods item : dataList) {
-                                //赋值项到单页数组
-                                group[index] = item;
-                                if (index == group.length - 1) {//到达单页数组最后一项
-                                    //添加单页数组
-                                    goodsGroupTmp.add(group);
-                                    //新建单页的大小
-                                    itemSize = dataListSizeNow < GroupSize ? dataListSizeNow - 1 : GroupSize;
-                                    Loger.d("新建单页的大小:" + itemSize);
-                                    group = new Goods[itemSize];
-                                    index = 0;
-                                } else {
-                                    index++;
-                                }
-                                dataListSizeNow--;
-                            }
-                            return goodsGroupTmp;
-                        }
-                    })
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeOn(Schedulers.io()).subscribe(new Observer<List<Goods[]>>() {
-                @Override
-                public void onSubscribe(Disposable d) {
-
-                }
-
-                @Override
-                public void onNext(List<Goods[]> goodsGroupTmp) {
-                    goodsGroup.clear();
-                    goodsGroup.addAll(goodsGroupTmp);
-                }
-
-                @Override
-                public void onError(Throwable e) {
-
-                }
-
-                @Override
-                public void onComplete() {
-                    notifyDataSetChanged();
-                }
-            });
-
-        }
-    }
 
     public class GoodTypeAdapter extends RecyclerView.Adapter<GoodTypeAdapter.GoodTypeViewHolder> {
 
         private List<GoodType> data = new ArrayList<>();
         private int curIndex = 0;
-        private ViewPagerAdapter mGridAdapter;
+        private SkuTypeManger skuTypeManger;
 
-        private GoodTypeAdapter(ViewPagerAdapter gridAdapter) {
-            this.mGridAdapter = gridAdapter;
+        private GoodTypeAdapter(SkuTypeManger skuTypeManger) {
+            this.skuTypeManger = skuTypeManger;
         }
 
         public void setData(List<GoodType> data) {
@@ -444,7 +226,7 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
         }
 
         public void myNotifyDataSetChanged() {
-            mGridAdapter.setDataByType(data.get(curIndex).getTypeName());
+            skuTypeManger.setType(data.get(curIndex).getTypeName());
             notifyDataSetChanged();
         }
 

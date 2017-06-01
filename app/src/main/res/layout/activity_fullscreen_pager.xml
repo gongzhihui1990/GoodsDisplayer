@@ -59,10 +59,18 @@
         android:layout_height="0dp"
         android:layout_weight="93">
 
-        <android.support.v7.widget.RecyclerView
+        <TextView
+            android:id="@+id/tv_hint_common"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <koolpos.cn.goodsdisplayer.ui.widget.BounceBackViewPager
             android:id="@+id/grid_content"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
 
         <TextView
             android:drawablePadding="12dp"
@@ -79,5 +87,17 @@
             android:textColor="@android:color/black" />
     </RelativeLayout>
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:visibility="gone">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/list_content_title"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </RelativeLayout>
 
 </LinearLayout>
