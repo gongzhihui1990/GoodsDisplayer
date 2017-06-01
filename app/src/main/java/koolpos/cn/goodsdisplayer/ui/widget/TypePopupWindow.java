@@ -18,6 +18,8 @@ import java.util.List;
 
 import koolpos.cn.goodsdisplayer.R;
 import koolpos.cn.goodsdisplayer.mvcModel.GoodType;
+import koolpos.cn.goodsdisplayer.mvcModel.Goods;
+import koolpos.cn.goodsdisplayer.util.Loger;
 
 /**
  * Created by caroline on 2017/5/29.
@@ -25,7 +27,7 @@ import koolpos.cn.goodsdisplayer.mvcModel.GoodType;
 
 public class TypePopupWindow extends PopupWindow {
     public interface OnSPUSelectedListener{
-        public void onSelected(GoodType type);
+        public void onSelected(int index);
     }
     private Context mContext;
 
@@ -35,7 +37,7 @@ public class TypePopupWindow extends PopupWindow {
 //    @BindView(R.id.list_content_title)
     RecyclerView listSPU;
 
-    public TypePopupWindow(Context mContext,List<GoodType> typeList,final OnSPUSelectedListener listener) {
+    public TypePopupWindow(Context mContext, int  selectedIndex, List<GoodType> typeList, final OnSPUSelectedListener listener) {
 
         this.view = LayoutInflater.from(mContext).inflate(R.layout.layout_select_type, null);
         listSPU = (RecyclerView) this.view.findViewById(R.id.list_spu);
@@ -46,13 +48,13 @@ public class TypePopupWindow extends PopupWindow {
         listSPU.addItemDecoration(itemDecoration);
         OnSPUSelectedListener onSPUSelectedListener =new OnSPUSelectedListener() {
             @Override
-            public void onSelected(GoodType type) {
-                listener.onSelected(type);
+            public void onSelected(int  selectedIndex) {
+                listener.onSelected(selectedIndex);
                 dismiss();
             }
         };
         GoodTypeAdapter typeAdapter=new GoodTypeAdapter(onSPUSelectedListener);
-        typeAdapter.setData(typeList);
+        typeAdapter.setData(typeList,selectedIndex);
         listSPU.setAdapter(typeAdapter);
         // 设置外部可点击
         this.setOutsideTouchable(true);
@@ -96,14 +98,15 @@ public class TypePopupWindow extends PopupWindow {
     public class GoodTypeAdapter extends RecyclerView.Adapter<TypePopupWindow.GoodTypeAdapter.GoodTypeViewHolder>{
 
         private List<GoodType> data=new ArrayList<>();
-        private int curIndex = 0;
+        private int curIndex = -1;
         private OnSPUSelectedListener onSPUSelectedListener;
         public GoodTypeAdapter(OnSPUSelectedListener onSPUSelectedListener) {
             this.onSPUSelectedListener=onSPUSelectedListener;
         }
 
-        public void setData(List<GoodType> data) {
+        public void setData(List<GoodType> data,int selectedIndex) {
             this.data = data;
+            this.curIndex =selectedIndex;
             myNotifyDataSetChanged();
         }
 
@@ -119,12 +122,15 @@ public class TypePopupWindow extends PopupWindow {
 
         @Override
         public void onBindViewHolder(final TypePopupWindow.GoodTypeAdapter.GoodTypeViewHolder holder, int position) {
+            GoodType dataTmp = data.get(position);
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     if (curIndex!=holder.getAdapterPosition()){
                         curIndex =holder.getAdapterPosition();
-                        onSPUSelectedListener.onSelected(data.get(curIndex));
+                        if (onSPUSelectedListener!=null){
+                            onSPUSelectedListener.onSelected(curIndex);
+                        }
                         myNotifyDataSetChanged();
                     }
                 }

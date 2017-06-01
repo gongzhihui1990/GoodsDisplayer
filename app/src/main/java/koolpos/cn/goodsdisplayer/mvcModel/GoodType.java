@@ -29,4 +29,8 @@ public class GoodType implements Serializable{
     public void setChecked(boolean checked) {
         isChecked = checked;
     }
+
+    public boolean equals(GoodType obj) {
+        return obj.getTypeName().equals(this.getTypeName());
+    }
 }
