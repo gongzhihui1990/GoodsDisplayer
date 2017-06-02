@@ -85,7 +85,6 @@ public class DisplayGoodGroupFragment extends BaseFragment {
             Loger.d("render resumeRequests");
             Glide.with(getActivity())
                     .load(FileUtil.getImageCashFile(itemGood.getImage_url()))
-    //               .load(itemGood.getImage_url())
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .placeholder(R.mipmap.downloading)
                     .animate(R.anim.zoom_in)

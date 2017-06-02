@@ -4,44 +4,37 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.view.ViewPager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.PopupWindow;
-import android.widget.Scroller;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
 import org.json.JSONException;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import io.reactivex.Observable;
-import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import koolpos.cn.goodproviderservice.service.aidl.IGPService;
 import koolpos.cn.goodsdisplayer.MyApplication;
@@ -52,13 +45,9 @@ import koolpos.cn.goodsdisplayer.mvcModel.GoodType;
 import koolpos.cn.goodsdisplayer.mvcModel.Goods;
 import koolpos.cn.goodsdisplayer.ui.adapter.DisplaySkuAdapter;
 import koolpos.cn.goodsdisplayer.ui.fragment.DisplayGoodGroupFragment;
-import koolpos.cn.goodsdisplayer.ui.widget.BounceBackViewPager;
-import koolpos.cn.goodsdisplayer.ui.widget.DividerGridItemDecoration;
-import koolpos.cn.goodsdisplayer.ui.widget.FixedSpeedScroller;
-import koolpos.cn.goodsdisplayer.ui.widget.GridSpacingItemDecoration;
+import koolpos.cn.goodsdisplayer.ui.widget.SpacesItemDecoration;
 import koolpos.cn.goodsdisplayer.ui.widget.TypePopupWindow;
 import koolpos.cn.goodsdisplayer.util.AndroidUtils;
-import koolpos.cn.goodsdisplayer.util.Loger;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -85,8 +74,23 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
             IGPService gpService = IGPService.Stub.asInterface(iBinder);
             aidlApi = new AidlApi(gpService);
             final DisplaySkuAdapter gridAdapter=new DisplaySkuAdapter(aidlApi);
-            GridSpacingItemDecoration dividerGridItemDecoration =new GridSpacingItemDecoration(Integer.MAX_VALUE,20,true);
-            gridContentView.addItemDecoration(dividerGridItemDecoration);
+            gridAdapter.setDetailCall(new DisplaySkuAdapter.SkuDisplayDetail() {
+                @Override
+                public void show(Goods good) {
+                    stop();
+                    Intent intent =new Intent(getBaseContext(),ShowDetailActivity.class);
+                    intent.putExtra(Goods.class.getName(),good);
+                    Bitmap cacheBmp = Bitmap.createBitmap(getWindow().getDecorView().getWidth(), getWindow().getDecorView().getHeight(), Bitmap.Config.ARGB_8888);
+                    Canvas canvas = new Canvas(cacheBmp);
+                    getWindow().getDecorView().draw(canvas);
+                    MyApplication.CacheBitmap=cacheBmp;
+                    startActivityForResult(intent,showSku);
+
+                }
+            });
+            SpacesItemDecoration decoration =new SpacesItemDecoration(20);
+//            GridSpacingItemDecoration dividerGridItemDecoration =new GridSpacingItemDecoration(Integer.MAX_VALUE,20,true);
+            gridContentView.addItemDecoration(decoration);
             gridContentView.setAdapter(gridAdapter);
             try {
                 types = aidlApi.getTypeList();
@@ -148,7 +152,8 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
 //        titleLayoutManager.setOrientation(GridLayoutManager.VERTICAL);
 //        listContentTitle.setLayoutManager(titleLayoutManager);
 //        listContentTitle.setAdapter(typeAdapter);
-        gridContentView.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.HORIZONTAL));
+        gridContentView.setLayoutManager(new LinearLayoutManager(getBaseContext(),LinearLayoutManager.HORIZONTAL,false));
+//        gridContentView.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.HORIZONTAL));
         Intent serviceIntent = new Intent(IGPService.class.getName());
         serviceIntent = AndroidUtils.getExplicitIntent(getBaseContext(), serviceIntent);
         boolean bindService = bindService(serviceIntent, connection, Context.BIND_AUTO_CREATE);
@@ -171,6 +176,15 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
         });
     }
 
+    private final int showSku= 10;
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode==showSku){
+            start();
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
     @Override
     protected void onDestroy() {
         unbindService(connection);
@@ -185,7 +199,7 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
 
     private int mCurrentPage = 0;
     private boolean isAutoPlay = true;
-    private Disposable mViewPagerSubscribe;
+    private Disposable mRoundSubscribe;
     private static final Interpolator sInterpolator = new Interpolator() {
         @Override
         public float getInterpolation(float t) {
@@ -196,16 +210,44 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
     private boolean stateStop = true;
 
 
+    //private
     //开始轮播
     public void start() {
+        mRoundSubscribe =Observable.interval(100,10,TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Consumer<Long>() {
+                    @Override
+                    public void accept(@NonNull Long aLong) throws Exception {
+                        if (gridContentView.canScrollHorizontally(1)){
+                            gridContentView.scrollBy(1,0);
+                        }else {
+                            gridContentView.scrollToPosition(0);
+                        }
+                    }
+                });
     }
 
     //重新轮播
     public void reStart() {
+            mRoundSubscribe =Observable.interval(3000,10,TimeUnit.MILLISECONDS)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(new Consumer<Long>() {
+                        @Override
+                        public void accept(@NonNull Long aLong) throws Exception {
+                            if (gridContentView.canScrollHorizontally(1)){
+                                gridContentView.scrollBy(1,0);
+                            }else {
+                                gridContentView.scrollToPosition(0);
+                            }
+                        }
+                    });
     }
 
     //结束、暂停轮播
     public void stop() {
+        mRoundSubscribe.dispose();
     }
 
 
