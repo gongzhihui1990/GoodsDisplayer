@@ -12,12 +12,9 @@ import android.os.IBinder;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.animation.Interpolator;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
@@ -25,7 +22,6 @@ import com.bumptech.glide.Glide;
 
 import org.json.JSONException;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -40,8 +36,7 @@ import koolpos.cn.goodproviderservice.service.aidl.IGPService;
 import koolpos.cn.goodsdisplayer.MyApplication;
 import koolpos.cn.goodsdisplayer.R;
 import koolpos.cn.goodsdisplayer.api.AidlApi;
-import koolpos.cn.goodsdisplayer.api.SkuTypeManger;
-import koolpos.cn.goodsdisplayer.mvcModel.GoodType;
+import koolpos.cn.goodsdisplayer.mvcModel.ProductType;
 import koolpos.cn.goodsdisplayer.mvcModel.Goods;
 import koolpos.cn.goodsdisplayer.ui.adapter.DisplaySkuAdapter;
 import koolpos.cn.goodsdisplayer.ui.fragment.DisplayGoodGroupFragment;
@@ -59,7 +54,6 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
     RecyclerView gridContentView;
     @BindView(R.id.select_type)
     TextView tvSelectType;
-    private AidlApi aidlApi;
     /**
      * 当前分类标记位
      */
@@ -67,29 +61,24 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
     /**
      * 分类列表
      */
-    private List<GoodType> types;
+    private List<ProductType> types;
     ServiceConnection connection = new ServiceConnection() {
+        private AidlApi aidlApi;
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             IGPService gpService = IGPService.Stub.asInterface(iBinder);
             aidlApi = new AidlApi(gpService);
-            final DisplaySkuAdapter gridAdapter=new DisplaySkuAdapter(aidlApi);
-            gridAdapter.setDetailCall(new DisplaySkuAdapter.SkuDisplayDetail() {
+            final DisplaySkuAdapter gridAdapter = new DisplaySkuAdapter(aidlApi);
+            gridAdapter.setSkuDisplayCallBack(new DisplaySkuAdapter.SkuDisplayDetailCall() {
                 @Override
                 public void show(Goods good) {
                     stop();
-                    Intent intent =new Intent(getBaseContext(),ShowDetailActivity.class);
-                    intent.putExtra(Goods.class.getName(),good);
-                    Bitmap cacheBmp = Bitmap.createBitmap(getWindow().getDecorView().getWidth(), getWindow().getDecorView().getHeight(), Bitmap.Config.ARGB_8888);
-                    Canvas canvas = new Canvas(cacheBmp);
-                    getWindow().getDecorView().draw(canvas);
-                    MyApplication.CacheBitmap=cacheBmp;
-                    startActivityForResult(intent,showSku);
-
+                    Intent intent = new Intent(getBaseContext(), ShowDetailActivity.class);
+                    intent.putExtra(Goods.class.getName(), good);
+                    startActivityForResult(intent, showSku);
                 }
             });
-            SpacesItemDecoration decoration =new SpacesItemDecoration(20);
-//            GridSpacingItemDecoration dividerGridItemDecoration =new GridSpacingItemDecoration(Integer.MAX_VALUE,20,true);
+            SpacesItemDecoration decoration = new SpacesItemDecoration(20);
             gridContentView.addItemDecoration(decoration);
             gridContentView.setAdapter(gridAdapter);
             try {
@@ -105,7 +94,7 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
                             @Override
                             public void onSelected(/*GoodType type,*/int index) {
                                 selectedIndex = index;
-                                GoodType type = types.get(selectedIndex);
+                                ProductType type = types.get(selectedIndex);
                                 gridAdapter.setType(type.getTypeName());
                             }
                         };
@@ -124,7 +113,7 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
 
     private WindowManager.LayoutParams params;
 
-    private void showPopFormBottom(List<GoodType> data, int selectedIndex, TypePopupWindow.OnSPUSelectedListener spuSelectedListener) {
+    private void showPopFormBottom(List<ProductType> data, int selectedIndex, TypePopupWindow.OnSPUSelectedListener spuSelectedListener) {
         TypePopupWindow popupWindow = new TypePopupWindow(getBaseContext(), selectedIndex, data, spuSelectedListener);
         popupWindow.showAtLocation(findViewById(R.id.main_view), Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
         params = getWindow().getAttributes();
@@ -147,17 +136,12 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fullscreen);
         Glide.with(MyApplication.getContext()).resumeRequests();
-             //Title布局
-//        GridLayoutManager titleLayoutManager = new GridLayoutManager(this,1);
-//        titleLayoutManager.setOrientation(GridLayoutManager.VERTICAL);
-//        listContentTitle.setLayoutManager(titleLayoutManager);
-//        listContentTitle.setAdapter(typeAdapter);
-        gridContentView.setLayoutManager(new LinearLayoutManager(getBaseContext(),LinearLayoutManager.HORIZONTAL,false));
-//        gridContentView.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.HORIZONTAL));
+        gridContentView.setLayoutManager(new LinearLayoutManager(getBaseContext(), LinearLayoutManager.HORIZONTAL, false));
         Intent serviceIntent = new Intent(IGPService.class.getName());
         serviceIntent = AndroidUtils.getExplicitIntent(getBaseContext(), serviceIntent);
         boolean bindService = bindService(serviceIntent, connection, Context.BIND_AUTO_CREATE);
-        start();
+        startDisplay();
+        startCountingAd();
         gridContentView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -168,7 +152,8 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
                         break;
                     case MotionEvent.ACTION_UP:
                         stop();
-                        reStart();
+                        reStartDisplay();
+                        startCountingAd();
                         break;
                 }
                 return false;
@@ -176,11 +161,16 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
         });
     }
 
-    private final int showSku= 10;
+    private final int showSku = 10;
+    private final int showAd = 11;
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode==showSku){
-            start();
+        if (requestCode == showSku) {
+            startDisplay();
+        }
+        if (requestCode == showAd){
+            startCountingAd();
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -197,52 +187,63 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
 
     }
 
-    private int mCurrentPage = 0;
-    private boolean isAutoPlay = true;
     private Disposable mRoundSubscribe;
-    private static final Interpolator sInterpolator = new Interpolator() {
-        @Override
-        public float getInterpolation(float t) {
-            t -= 1.0f;
-            return t * t * t * t * t + 1.0f;
-        }
-    };
-    private boolean stateStop = true;
 
+    private Disposable mAdSubscribe;
 
-    //private
+    private int speedPeriod = 100;
+    private int startPeriod = 1000;
+    private int replayPeriod = 3000;
+    private boolean inverse = false;
+
     //开始轮播
-    public void start() {
-        mRoundSubscribe =Observable.interval(100,10,TimeUnit.MILLISECONDS)
+    public void startDisplay() {
+        mRoundSubscribe = Observable.interval(startPeriod, speedPeriod, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(new Consumer<Long>() {
                     @Override
                     public void accept(@NonNull Long aLong) throws Exception {
-                        if (gridContentView.canScrollHorizontally(1)){
-                            gridContentView.scrollBy(1,0);
-                        }else {
-                            gridContentView.scrollToPosition(0);
+                        if (inverse) {
+                            if (gridContentView.canScrollHorizontally(-1)) {
+                                gridContentView.scrollBy(-1, 0);
+                            } else {
+                                inverse = false;
+                            }
+                        } else {
+                            if (gridContentView.canScrollHorizontally(1)) {
+                                gridContentView.scrollBy(1, 0);
+                            } else {
+                                inverse = true;
+                            }
                         }
                     }
                 });
     }
 
     //重新轮播
-    public void reStart() {
-            mRoundSubscribe =Observable.interval(3000,10,TimeUnit.MILLISECONDS)
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribeOn(Schedulers.io())
-                    .subscribe(new Consumer<Long>() {
-                        @Override
-                        public void accept(@NonNull Long aLong) throws Exception {
-                            if (gridContentView.canScrollHorizontally(1)){
-                                gridContentView.scrollBy(1,0);
-                            }else {
-                                gridContentView.scrollToPosition(0);
+    public void reStartDisplay() {
+        mRoundSubscribe = Observable.interval(replayPeriod, speedPeriod, TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Consumer<Long>() {
+                    @Override
+                    public void accept(@NonNull Long aLong) throws Exception {
+                        if (inverse) {
+                            if (gridContentView.canScrollHorizontally(-1)) {
+                                gridContentView.scrollBy(-1, 0);
+                            } else {
+                                inverse = false;
+                            }
+                        } else {
+                            if (gridContentView.canScrollHorizontally(1)) {
+                                gridContentView.scrollBy(1, 0);
+                            } else {
+                                inverse = true;
                             }
                         }
-                    });
+                    }
+                });
     }
 
     //结束、暂停轮播
@@ -250,61 +251,37 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
         mRoundSubscribe.dispose();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        startCountingAd();
+    }
 
-
-    public class GoodTypeAdapter extends RecyclerView.Adapter<GoodTypeAdapter.GoodTypeViewHolder> {
-
-        private List<GoodType> data = new ArrayList<>();
-        private int curIndex = 0;
-        private SkuTypeManger skuTypeManger;
-
-        private GoodTypeAdapter(SkuTypeManger skuTypeManger) {
-            this.skuTypeManger = skuTypeManger;
-        }
-
-        public void setData(List<GoodType> data) {
-            this.data = data;
-            myNotifyDataSetChanged();
-        }
-
-        public void myNotifyDataSetChanged() {
-            skuTypeManger.setType(data.get(curIndex).getTypeName());
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public GoodTypeViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_good_title, parent, false);
-            return new GoodTypeViewHolder(itemView);
-        }
-
-        @Override
-        public void onBindViewHolder(final GoodTypeViewHolder holder, int position) {
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (curIndex != holder.getAdapterPosition()) {
-                        curIndex = holder.getAdapterPosition();
-                        myNotifyDataSetChanged();
-                    }
-                }
-            });
-            holder.good_type.setSelected(curIndex == position);
-            holder.good_type.setText(data.get(position).getTypeName());
-        }
-
-        @Override
-        public int getItemCount() {
-            return data.size();
-        }
-
-        class GoodTypeViewHolder extends RecyclerView.ViewHolder {
-            TextView good_type;
-
-            private GoodTypeViewHolder(View itemView) {
-                super(itemView);
-                good_type = (TextView) itemView.findViewById(R.id.good_type);
-            }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mAdSubscribe!=null){
+            mAdSubscribe.dispose();
         }
     }
+
+    private int adWaitingPeriod = 30 ;
+    //adWaitingPeriod d秒后 播放广播
+    private void startCountingAd(){
+        if (mAdSubscribe!=null){
+            mAdSubscribe.dispose();
+        }
+        mAdSubscribe = Observable.timer(adWaitingPeriod, TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Consumer<Long>() {
+                    @Override
+                    public void accept(@NonNull Long aLong) throws Exception {
+                        Intent intent =new Intent(getBaseContext(),AdVideoDisplayActivity.class);
+                        startActivityForResult(intent,showAd);
+                        mAdSubscribe.dispose();
+                    }
+                });
+    }
+
 }

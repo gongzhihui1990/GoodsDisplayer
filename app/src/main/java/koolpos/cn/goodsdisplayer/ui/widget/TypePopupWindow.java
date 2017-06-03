@@ -2,7 +2,6 @@ package koolpos.cn.goodsdisplayer.ui.widget;
 
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -17,9 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import koolpos.cn.goodsdisplayer.R;
-import koolpos.cn.goodsdisplayer.mvcModel.GoodType;
-import koolpos.cn.goodsdisplayer.mvcModel.Goods;
-import koolpos.cn.goodsdisplayer.util.Loger;
+import koolpos.cn.goodsdisplayer.mvcModel.ProductType;
 
 /**
  * Created by caroline on 2017/5/29.
@@ -37,7 +34,7 @@ public class TypePopupWindow extends PopupWindow {
 //    @BindView(R.id.list_content_title)
     RecyclerView listSPU;
 
-    public TypePopupWindow(Context mContext, int  selectedIndex, List<GoodType> typeList, final OnSPUSelectedListener listener) {
+    public TypePopupWindow(Context mContext, int  selectedIndex, List<ProductType> typeList, final OnSPUSelectedListener listener) {
 
         this.view = LayoutInflater.from(mContext).inflate(R.layout.layout_select_type, null);
         listSPU = (RecyclerView) this.view.findViewById(R.id.list_spu);
@@ -97,14 +94,14 @@ public class TypePopupWindow extends PopupWindow {
     }
     public class GoodTypeAdapter extends RecyclerView.Adapter<TypePopupWindow.GoodTypeAdapter.GoodTypeViewHolder>{
 
-        private List<GoodType> data=new ArrayList<>();
+        private List<ProductType> data=new ArrayList<>();
         private int curIndex = -1;
         private OnSPUSelectedListener onSPUSelectedListener;
         public GoodTypeAdapter(OnSPUSelectedListener onSPUSelectedListener) {
             this.onSPUSelectedListener=onSPUSelectedListener;
         }
 
-        public void setData(List<GoodType> data,int selectedIndex) {
+        public void setData(List<ProductType> data, int selectedIndex) {
             this.data = data;
             this.curIndex =selectedIndex;
             myNotifyDataSetChanged();
@@ -122,7 +119,7 @@ public class TypePopupWindow extends PopupWindow {
 
         @Override
         public void onBindViewHolder(final TypePopupWindow.GoodTypeAdapter.GoodTypeViewHolder holder, int position) {
-            GoodType dataTmp = data.get(position);
+            ProductType dataTmp = data.get(position);
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

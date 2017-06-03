@@ -1,45 +1,186 @@
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="koolpos.cn.goodsdisplayer.ui.activity.ShowDetailActivity"
-    android:layout_width="match_parent"
     android:id="@+id/root_view"
-    android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bgaa"
+    tools:context="koolpos.cn.goodsdisplayer.ui.activity.ShowDetailActivity">
+
     <ImageView
         android:id="@+id/iv_bg"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="horizontal">
+
     <RelativeLayout
-        android:id="@+id/rl_left"
-        android:layout_weight="1"
-        android:layout_width="0dp"
-        android:layout_height="match_parent">
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dimens_220"
+        android:layout_alignParentTop="true">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="180dp"
+            android:layout_toLeftOf="@+id/point_left"
+            android:background="@drawable/shape_line_left" />
 
         <ImageView
-            android:layout_centerInParent="true"
-            android:id="@+id/good_img"
+            android:id="@+id/point_left"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/rl_right"
-        android:layout_weight="1"
-        android:layout_width="0dp"
-        android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="120dp"
+            android:layout_toLeftOf="@+id/tv_title"
+            android:src="@mipmap/point_title" />
 
         <TextView
-            android:gravity="center"
-            android:textColor="@android:color/black"
-            android:layout_centerInParent="true"
-            android:id="@+id/good_name"
+            android:id="@+id/tv_title"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </RelativeLayout>
-</LinearLayout>
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/title_display_screen"
+            android:textColor="@color/title_head_color"
+            android:textSize="@dimen/title_head_text_size" />
 
-</FrameLayout>
+        <ImageView
+            android:id="@+id/point_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="120dp"
+            android:layout_toRightOf="@+id/tv_title"
+            android:src="@mipmap/point_title" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="180dp"
+            android:layout_toRightOf="@+id/point_right"
+            android:background="@drawable/shape_line_right" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/title"
+        android:orientation="horizontal">
+
+        <FrameLayout
+            android:layout_width="@dimen/gird_height"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/dimens_32"
+                android:padding="@dimen/dimens_32"
+                android:text="返回"
+                android:textStyle="bold"
+                android:textColor="@android:color/holo_orange_dark"
+                android:textSize="@dimen/big_text_size" />
+        </FrameLayout>
+
+        <RelativeLayout
+            android:id="@+id/rl_left"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/good_img"
+                    android:layout_width="@dimen/gird_height"
+                    android:layout_height="@dimen/gird_height" />
+
+                <TextView
+                    android:id="@+id/good_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dimens_60"
+                    android:text="这里显示商品名称"
+                    android:textSize="@dimen/middle_text_size" />
+
+                <TextView
+                    android:id="@+id/good_price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dimens_48"
+                    android:text="￥1024.00"
+                    android:textSize="@dimen/middle_text_size" />
+            </LinearLayout>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/rl_right"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginRight="@dimen/gird_height"
+            android:layout_weight="1">
+
+
+            <TextView
+                android:id="@+id/good_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="@dimen/dimens_20"
+                android:gravity="center"
+                android:text="商品信息"
+                android:textColor="@color/title_head_color"
+                android:textSize="@dimen/big_text_size" />
+
+            <TextView
+                android:id="@+id/good_description"
+                android:layout_marginBottom="@dimen/dimens_300"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_below="@+id/good_title"
+                android:layout_marginRight="@dimen/dimens_20"
+                android:layout_marginTop="@dimen/dimens_96"
+                android:gravity="center|right"
+                android:text="单穿打底都合适\n完美展现小雨点时空\n司机手机电视机"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="@dimen/middle_text_size" />
+            <!--  android:layout_width="@dimen/dimens_220"
+              android:layout_height="@dimen/dimens_220"-->
+            <ImageView
+                android:id="@+id/iv_pay_code"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_below="@+id/good_description" />
+
+            <View
+                android:id="@+id/lineShort"
+                android:layout_width="4dp"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/good_title"
+                android:layout_alignParentRight="true"
+                android:layout_alignTop="@+id/good_title"
+                android:background="@color/title_head_color" />
+            <View
+                android:id="@+id/lineLong"
+                android:layout_width="1dp"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/iv_pay_code"
+                android:layout_alignParentRight="true"
+                android:layout_below="@+id/lineShort"
+                android:background="@android:color/darker_gray" />
+        </RelativeLayout>
+    </LinearLayout>
+
+</RelativeLayout>

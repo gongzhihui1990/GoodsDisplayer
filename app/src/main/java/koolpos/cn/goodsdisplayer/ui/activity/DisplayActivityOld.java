@@ -43,7 +43,7 @@ import koolpos.cn.goodproviderservice.service.aidl.IGPService;
 import koolpos.cn.goodsdisplayer.MyApplication;
 import koolpos.cn.goodsdisplayer.R;
 import koolpos.cn.goodsdisplayer.api.AidlApi;
-import koolpos.cn.goodsdisplayer.mvcModel.GoodType;
+import koolpos.cn.goodsdisplayer.mvcModel.ProductType;
 import koolpos.cn.goodsdisplayer.mvcModel.Goods;
 import koolpos.cn.goodsdisplayer.ui.fragment.DisplayGoodGroupFragment;
 import koolpos.cn.goodsdisplayer.ui.widget.BounceBackViewPager;
@@ -76,7 +76,7 @@ public class DisplayActivityOld extends BaseActivity implements DisplayGoodGroup
     /**
      * 分类列表
      */
-    private List<GoodType> types;
+    private List<ProductType> types;
     ServiceConnection connection =new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
@@ -94,7 +94,7 @@ public class DisplayActivityOld extends BaseActivity implements DisplayGoodGroup
                             @Override
                             public void onSelected(/*GoodType type,*/int index) {
                                 selectedIndex=index;
-                                GoodType type = types.get(selectedIndex);
+                                ProductType type = types.get(selectedIndex);
                                 Loger.d("type=="+type.getTypeName());
                                 gridAdapter.setDataByType(type.getTypeName());
                             }
@@ -113,7 +113,7 @@ public class DisplayActivityOld extends BaseActivity implements DisplayGoodGroup
     };
 
     private WindowManager.LayoutParams params;
-    private void showPopFormBottom(List<GoodType> data, int selectedIndex, TypePopupWindow.OnSPUSelectedListener spuSelectedListener){
+    private void showPopFormBottom(List<ProductType> data, int selectedIndex, TypePopupWindow.OnSPUSelectedListener spuSelectedListener){
         TypePopupWindow popupWindow=new TypePopupWindow(getBaseContext(),selectedIndex,data,spuSelectedListener);
         popupWindow.showAtLocation(findViewById(R.id.main_view), Gravity.BOTTOM|Gravity.CENTER_HORIZONTAL, 0, 0);
         params = getWindow().getAttributes();
@@ -384,14 +384,14 @@ public class DisplayActivityOld extends BaseActivity implements DisplayGoodGroup
 
     public class GoodTypeAdapter extends RecyclerView.Adapter<GoodTypeAdapter.GoodTypeViewHolder>{
 
-        private List<GoodType> data=new ArrayList<>();
+        private List<ProductType> data=new ArrayList<>();
         private int curIndex = 0;
         private ViewPagerAdapter mGridAdapter;
         private GoodTypeAdapter(ViewPagerAdapter gridAdapter) {
             this.mGridAdapter=gridAdapter;
         }
 
-        public void setData(List<GoodType> data) {
+        public void setData(List<ProductType> data) {
             this.data = data;
             myNotifyDataSetChanged();
         }

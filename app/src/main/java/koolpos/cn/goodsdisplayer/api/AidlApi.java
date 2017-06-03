@@ -1,7 +1,6 @@
 package koolpos.cn.goodsdisplayer.api;
 
 import android.os.RemoteException;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -14,7 +13,7 @@ import java.util.List;
 
 import koolpos.cn.goodproviderservice.service.aidl.IGPService;
 import koolpos.cn.goodsdisplayer.mvcModel.AidlResponse;
-import koolpos.cn.goodsdisplayer.mvcModel.GoodType;
+import koolpos.cn.goodsdisplayer.mvcModel.ProductType;
 import koolpos.cn.goodsdisplayer.mvcModel.Goods;
 import koolpos.cn.goodsdisplayer.util.Loger;
 
@@ -27,7 +26,7 @@ public class AidlApi {
     public AidlApi(IGPService service){
         this.service=service;
     }
-    public List<GoodType> getTypeList() throws JSONException{
+    public List<ProductType> getTypeList() throws JSONException{
         JSONObject request=new JSONObject();
         request.put("action","local/get/getTypeList");
         AidlResponse response =proxyPost(request.toString());
@@ -35,11 +34,11 @@ public class AidlApi {
         List<String> typeList =  new Gson().fromJson(data,
                 new TypeToken<List<String>>() {
                 }.getType());
-        List<GoodType> goodTypeList=new ArrayList<>();
+        List<ProductType> ptList=new ArrayList<>();
         for (String type:typeList) {
-            goodTypeList.add(new GoodType(type));
+            ptList.add(new ProductType(type));
         }
-        return goodTypeList;
+        return ptList;
     }
     public List<Goods> getListByType(String type) throws JSONException {
         JSONObject request=new JSONObject();

@@ -3,4 +3,7 @@
     <dimen name="imgW">392dp</dimen>
     <dimen name="imgH">216dp</dimen>
     <dimen name="padding_small">48dp</dimen>
+    <dimen name="gird_width">1020dp</dimen>
+    <dimen name="gird_height">500dp</dimen>
+
 </resources>

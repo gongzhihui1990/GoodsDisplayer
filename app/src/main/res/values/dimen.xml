@@ -3,5 +3,45 @@
     <dimen name="imgW">56dp</dimen>
     <dimen name="imgH">42dp</dimen>
     <dimen name="padding_small">10dp</dimen>
+    <dimen name="gird_width">612dp</dimen>
+    <dimen name="gird_height">300dp</dimen>
 
+
+    <!-- dimens_x : y = 2.4 : 1 -->
+    <dimen name="tpHight">40dp</dimen>
+    <dimen name="dimens_1">0.5dp</dimen>
+    <dimen name="dimens_18">7dp</dimen>
+    <dimen name="tplrPadding">7dp</dimen>
+    <dimen name="dimens_10">4dp</dimen>
+    <dimen name="dimens_20">8dp</dimen>
+    <dimen name="dimens_32">13dp</dimen>
+    <dimen name="dimens_40">17dp</dimen>
+    <dimen name="dimens_48">20dp</dimen>
+    <dimen name="dimens_60">25dp</dimen>
+    <dimen name="dimens_72">30dp</dimen>
+    <dimen name="dimens_80">33dp</dimen>
+    <dimen name="dimens_82_ne">-34dp</dimen>
+    <dimen name="dimens_96">40dp</dimen>
+    <dimen name="dimens_line_btn">48dp</dimen>
+    <dimen name="dimens_112">46.5dp</dimen>
+    <dimen name="dimens_120">50dp</dimen>
+    <dimen name="dimens_128">53.5dp</dimen>
+    <dimen name="progress_size">53.5dp</dimen>
+    <dimen name="dimens_144">60dp</dimen>
+    <dimen name="dimens_175">70dp</dimen>
+    <dimen name="dimens_220">92dp</dimen>
+    <dimen name="dimens_244">98dp</dimen>
+    <dimen name="dimens_260">108dp</dimen>
+    <dimen name="dimens_288">120dp</dimen>
+    <dimen name="dimens_369">164dp</dimen>
+    <dimen name="dimens_720">300dp</dimen>
+    <dimen name="dimens_qrcode">225dp</dimen>
+    <dimen name="action_bar_size">56dp</dimen>
+    <dimen name="money">38dp</dimen>
+    <dimen name="trans_input_height">48dp</dimen>
+    <dimen name="padding_text_time">136dp</dimen>
+    <dimen name="button_high">42dp</dimen>
+    <dimen name="dimen_24">10dp</dimen>
+    <dimen name="dimens_218">84dp</dimen>
+    <dimen name="dimens_562">225dp</dimen>
 </resources>

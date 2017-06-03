@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/grid_item"
-    android:layout_width="1020dp"
-    android:layout_height="500dp"
+    android:layout_width="@dimen/gird_width"
+    android:layout_height="@dimen/gird_height"
     android:orientation="horizontal">
 
     <FrameLayout
-        android:id="@+id/item_a_a_big"
+        android:id="@+id/item_a_big"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="400"

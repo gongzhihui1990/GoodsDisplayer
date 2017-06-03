@@ -24,7 +24,7 @@ import butterknife.BindView;
 import koolpos.cn.goodproviderservice.service.aidl.IGPService;
 import koolpos.cn.goodsdisplayer.R;
 import koolpos.cn.goodsdisplayer.api.AidlApi;
-import koolpos.cn.goodsdisplayer.mvcModel.GoodType;
+import koolpos.cn.goodsdisplayer.mvcModel.ProductType;
 import koolpos.cn.goodsdisplayer.mvcModel.Goods;
 import koolpos.cn.goodsdisplayer.util.AndroidUtils;
 import koolpos.cn.goodsdisplayer.util.Loger;
@@ -155,14 +155,14 @@ public class FullscreenActivityOld extends BaseActivity {
     }
     public class GoodTypeAdapter extends RecyclerView.Adapter<GoodTypeAdapter.GoodTypeViewHolder>{
 
-        private List<GoodType> data=new ArrayList<>();
+        private List<ProductType> data=new ArrayList<>();
         private int curIndex = 0;
         private GoodContentAdapter gridAdapter;
         public GoodTypeAdapter(GoodContentAdapter gridAdapter) {
             this.gridAdapter=gridAdapter;
         }
 
-        public void setData(List<GoodType> data) {
+        public void setData(List<ProductType> data) {
             this.data = data;
             myNotifyDataSetChanged();
         }

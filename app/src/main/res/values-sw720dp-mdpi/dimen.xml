@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="imgW">196dp</dimen>
+    <dimen name="imgH">144dp</dimen>
+    <dimen name="padding_small">32dp</dimen>
+    <dimen name="gird_width">510dp</dimen>
+    <dimen name="gird_height">250dp</dimen>
+</resources>
