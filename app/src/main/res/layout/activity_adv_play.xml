@@ -7,6 +7,15 @@
         android:layout_centerInParent="true"
         android:id="@+id/videoView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"/>
 
+    <TextView
+        android:id="@+id/tvTimeRemain"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:padding="@dimen/dimens_20"
+        android:textSize="@dimen/middle_text_size"
+        android:textColor="@android:color/holo_orange_dark"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 </RelativeLayout>
