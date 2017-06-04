@@ -1,12 +1,14 @@
 package koolpos.cn.goodsdisplayer.mvcModel;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 
 /**
  * Created by Administrator on 2017/5/13.
  */
 
-public class Goods implements Serializable{
+public class Goods implements Serializable,Cloneable{
     private static final long serialVersionUID = 1097401162952403629L;
     private String goods_name;
     private String goods_id;
@@ -48,5 +50,10 @@ public class Goods implements Serializable{
     @Override
     public String toString() {
         return getGoods_name()+"-"+getGoods_id().split("-")[0];
+    }
+
+    @Override
+    protected Goods clone() throws CloneNotSupportedException {
+        return new Gson().fromJson(new Gson().toJson(this),Goods.class);
     }
 }

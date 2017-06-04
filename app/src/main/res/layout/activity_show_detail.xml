@@ -1,5 +1,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -70,7 +71,8 @@
         android:orientation="horizontal">
 
         <FrameLayout
-            android:layout_width="@dimen/gird_height"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="match_parent">
 
             <TextView
@@ -88,8 +90,8 @@
         <RelativeLayout
             android:id="@+id/rl_left"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:layout_height="match_parent">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -127,7 +129,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginRight="@dimen/gird_height"
             android:layout_weight="1">
 
 
@@ -181,6 +182,12 @@
                 android:layout_below="@+id/lineShort"
                 android:background="@android:color/darker_gray" />
         </RelativeLayout>
+        <View
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent">
+
+        </View>
     </LinearLayout>
 
 </RelativeLayout>

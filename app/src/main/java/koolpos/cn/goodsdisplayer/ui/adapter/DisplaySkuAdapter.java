@@ -1,9 +1,12 @@
 package koolpos.cn.goodsdisplayer.ui.adapter;
 
+import android.content.Context;
+import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -35,6 +38,9 @@ import koolpos.cn.goodsdisplayer.util.Loger;
  */
 
 public class DisplaySkuAdapter extends RecyclerView.Adapter<DisplaySkuAdapter.ItemViewHolder> implements SkuTypeManger {
+    private boolean fillMode = true;//填满格子
+    private Goods[] fillModeItems;
+
     class ItemViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.item_a_big)
         View ab;
@@ -57,9 +63,51 @@ public class DisplaySkuAdapter extends RecyclerView.Adapter<DisplaySkuAdapter.It
         @BindView(R.id.item_b_small_4)
         View b4;
 
-        public ItemViewHolder(View itemView) {
+        public ItemViewHolder(final View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+            Observable.just(itemView)
+                    .map(new Function<View, Integer>() {
+                        @Override
+                        public Integer apply(@NonNull View view) throws Exception {
+                            int width =view.getHeight();
+                            return width;
+                        }
+                    }).subscribeOn(AndroidSchedulers.mainThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<Integer>() {
+                        @Override
+                        public void onSubscribe(Disposable d) {
+
+                        }
+
+                        @Override
+                        public void onNext(Integer width) {
+                            ViewGroup.LayoutParams lp=itemView.getLayoutParams();
+                            lp.width=width;
+                            itemView.setLayoutParams(lp);
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
+//            WindowManager wm = (WindowManager) itemView.getContext()
+//                    .getSystemService(Context.WINDOW_SERVICE);
+//
+//            int width = wm.getDefaultDisplay().getWidth();
+//            int height = wm.getDefaultDisplay().getHeight();
+//            Loger.d("h-w:"+height+"-"+width);
+//            ViewGroup.LayoutParams lp = itemView.getLayoutParams();
+//            lp.height= (int) (height*0.35);
+//            lp.width = lp.height*51/25;
+//            itemView.setLayoutParams(lp);
         }
     }
 
@@ -80,6 +128,7 @@ public class DisplaySkuAdapter extends RecyclerView.Adapter<DisplaySkuAdapter.It
                     @Override
                     public List<Goods> apply(@NonNull String type) throws Exception {
                         List<Goods> dataList = aidlApi.getListByType(type);
+                        fillModeItems = null;
                         return dataList;
                     }
                 })
@@ -87,7 +136,7 @@ public class DisplaySkuAdapter extends RecyclerView.Adapter<DisplaySkuAdapter.It
                     @Override
                     public List<Goods[]> apply(@NonNull List<Goods> dataList) throws Exception {
                         List<Goods[]> goodsGroupTmp = new ArrayList<Goods[]>();
-                        Loger.d("dataList size:" + dataList.size());
+                        Loger.d("size:" + dataList.size());
                         int dataListSizeNow = dataList.size();
                         int index = 0;
                         //新建数组的大小
@@ -97,9 +146,13 @@ public class DisplaySkuAdapter extends RecyclerView.Adapter<DisplaySkuAdapter.It
                         for (Goods item : dataList) {
                             //赋值项到单页数组
                             group[index] = item;
+
                             if (index == group.length - 1) {//到达单页数组最后一项
                                 //添加单页数组
                                 goodsGroupTmp.add(group);
+                                if (fillModeItems == null){
+                                    fillModeItems = group.clone();
+                                }
                                 //新建单页的大小
                                 itemSize = dataListSizeNow < GroupSize ? dataListSizeNow - 1 : GroupSize;
                                 Loger.d("新建单页的大小:" + itemSize);
@@ -149,11 +202,19 @@ public class DisplaySkuAdapter extends RecyclerView.Adapter<DisplaySkuAdapter.It
     public void onBindViewHolder(ItemViewHolder holder, int position) {
         Goods[] goodsTmp = goodGroups.get(position);
         Goods[] goods = new Goods[10];
-        for (int i=0;i<goodsTmp.length;i++){
+        Loger.d("goodsTmp len="+goodsTmp.length);
+        for (int i=0;i<goods.length;i++){
             if (i<goodsTmp.length){
                 goods[i] = goodsTmp[i];
             }else {
-                goods[i] = null;
+                if (fillMode&&fillModeItems!=null&&fillModeItems.length>i){
+                    //填满格子
+                    Loger.d("填满格子");
+                    goods[i] = fillModeItems[i];
+                }else {
+                    Loger.e("不填满格子");
+                    goods[i] = null;
+                }
             }
         }
         renderGood(holder.ab, goods[0]);
