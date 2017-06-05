@@ -1,12 +1,9 @@
 package koolpos.cn.goodsdisplayer.ui.adapter;
 
-import android.content.Context;
-import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -37,7 +34,7 @@ import koolpos.cn.goodsdisplayer.util.Loger;
  * Created by caroline on 2017/6/1.
  */
 
-public class DisplaySkuAdapter extends RecyclerView.Adapter<DisplaySkuAdapter.ItemViewHolder> implements SkuTypeManger {
+public class DisplayCategoryAdapter extends RecyclerView.Adapter<DisplayCategoryAdapter.ItemViewHolder> implements SkuTypeManger {
     private boolean fillMode = true;//填满格子
     private Goods[] fillModeItems;
 
@@ -116,7 +113,7 @@ public class DisplaySkuAdapter extends RecyclerView.Adapter<DisplaySkuAdapter.It
 
     private AidlApi aidlApi;
 
-    public DisplaySkuAdapter(AidlApi aidlApi) {
+    public DisplayCategoryAdapter(AidlApi aidlApi) {
         this.aidlApi = aidlApi;
     }
 

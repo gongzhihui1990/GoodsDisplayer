@@ -1,16 +1,17 @@
 package koolpos.cn.goodsdisplayer.ui.activity;
 
+import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -19,8 +20,6 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-
-import org.json.JSONException;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -38,7 +37,7 @@ import koolpos.cn.goodsdisplayer.R;
 import koolpos.cn.goodsdisplayer.api.AidlApi;
 import koolpos.cn.goodsdisplayer.mvcModel.ProductType;
 import koolpos.cn.goodsdisplayer.mvcModel.Goods;
-import koolpos.cn.goodsdisplayer.ui.adapter.DisplaySkuAdapter;
+import koolpos.cn.goodsdisplayer.ui.adapter.DisplayCategoryAdapter;
 import koolpos.cn.goodsdisplayer.ui.fragment.DisplayGoodGroupFragment;
 import koolpos.cn.goodsdisplayer.ui.widget.SpacesItemDecoration;
 import koolpos.cn.goodsdisplayer.ui.widget.TypePopupWindow;
@@ -64,23 +63,7 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
     private List<ProductType> types;
     ServiceConnection connection = new ServiceConnection() {
         private AidlApi aidlApi;
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            IGPService gpService = IGPService.Stub.asInterface(iBinder);
-            aidlApi = new AidlApi(gpService);
-            final DisplaySkuAdapter gridAdapter = new DisplaySkuAdapter(aidlApi);
-            gridAdapter.setSkuDisplayCallBack(new DisplaySkuAdapter.SkuDisplayDetailCall() {
-                @Override
-                public void show(Goods good) {
-                    stop();
-                    Intent intent = new Intent(getBaseContext(), ShowDetailActivity.class);
-                    intent.putExtra(Goods.class.getName(), good);
-                    startActivityForResult(intent, showSku);
-                }
-            });
-            SpacesItemDecoration decoration = new SpacesItemDecoration(20);
-            gridContentView.addItemDecoration(decoration);
-            gridContentView.setAdapter(gridAdapter);
+        private void getCategory(final DisplayCategoryAdapter gridAdapter){
             try {
                 types = aidlApi.getTypeList();
                 if (selectedIndex == -1) {
@@ -101,9 +84,44 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
                         showPopFormBottom(types, selectedIndex, spuSelectedListener);
                     }
                 });
-            } catch (JSONException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
+                new AlertDialog.Builder(DisplayActivity.this)
+                        .setMessage(e.getMessage())
+                        .setCancelable(false)
+                        .setNegativeButton("退出", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                finish();
+                            }
+                        })
+                        .setPositiveButton("重试", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                getCategory(gridAdapter);
+                            }
+                        })
+                        .show();
             }
+        }
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            IGPService gpService = IGPService.Stub.asInterface(iBinder);
+            aidlApi = new AidlApi(gpService);
+            final DisplayCategoryAdapter gridAdapter = new DisplayCategoryAdapter(aidlApi);
+            gridAdapter.setSkuDisplayCallBack(new DisplayCategoryAdapter.SkuDisplayDetailCall() {
+                @Override
+                public void show(Goods good) {
+                    stop();
+                    Intent intent = new Intent(getBaseContext(), ShowDetailActivity.class);
+                    intent.putExtra(Goods.class.getName(), good);
+                    startActivityForResult(intent, showSku);
+                }
+            });
+            SpacesItemDecoration decoration = new SpacesItemDecoration(20);
+            gridContentView.addItemDecoration(decoration);
+            gridContentView.setAdapter(gridAdapter);
+           getCategory(gridAdapter);
         }
 
         @Override

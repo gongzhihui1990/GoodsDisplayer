@@ -102,7 +102,7 @@ public class DisplayActivityOld extends BaseActivity implements DisplayGoodGroup
                         showPopFormBottom(types,selectedIndex,spuSelectedListener);
                     }
                 });
-            } catch (JSONException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

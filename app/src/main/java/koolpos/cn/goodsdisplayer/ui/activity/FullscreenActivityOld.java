@@ -69,9 +69,7 @@ public class FullscreenActivityOld extends BaseActivity {
 //                    String type = reqJson.optString("type");
 //                    response.setData(getListByType(type));
 //                    break;
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

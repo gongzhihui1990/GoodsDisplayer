@@ -1,5 +1,6 @@
 package koolpos.cn.goodsdisplayer.api;
 
+import android.app.AlertDialog;
 import android.os.RemoteException;
 
 import com.google.gson.Gson;
@@ -26,10 +27,13 @@ public class AidlApi {
     public AidlApi(IGPService service){
         this.service=service;
     }
-    public List<ProductType> getTypeList() throws JSONException{
+    public List<ProductType> getTypeList() throws Exception{
         JSONObject request=new JSONObject();
         request.put("action","local/get/getTypeList");
         AidlResponse response =proxyPost(request.toString());
+        if (response.getCode()!=0){
+            throw new Exception(response.getMessage());
+        }
         String data=response.getData();
         List<String> typeList =  new Gson().fromJson(data,
                 new TypeToken<List<String>>() {
