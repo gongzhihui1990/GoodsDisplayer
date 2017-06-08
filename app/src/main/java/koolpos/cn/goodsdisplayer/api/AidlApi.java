@@ -54,10 +54,19 @@ public class AidlApi {
                 }.getType());
         return goodsList;
     }
-    //                case "local/get/getListByType":
-//                    String type = reqJson.optString("type");
-//                    response.setData(getListByType(type));
-//                    break;
+    public String getCategories() throws JSONException {
+        JSONObject request=new JSONObject();
+        request.put("action","local/get/category");
+        AidlResponse response = proxyPost(request.toString());
+        return response.toString();
+    }
+    public String getProduct(String categoryId) throws JSONException {
+        JSONObject request=new JSONObject();
+        request.put("action","local/get/products");
+        request.put("categoryId",categoryId);
+        AidlResponse response = proxyPost(request.toString());
+        return response.toString();
+    }
     private AidlResponse proxyPost(String request){
         String response = "";
         try {

@@ -66,6 +66,11 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
         private void getCategory(final DisplayCategoryAdapter gridAdapter){
             try {
                 types = aidlApi.getTypeList();
+                aidlApi.getCategories();
+                aidlApi.getProduct("4");
+                if (types.size()==0){
+                    throw new Exception("无法获取类型纪录");
+                }
                 if (selectedIndex == -1) {
                     selectedIndex = 0;
                     gridAdapter.setType(types.get(0).getTypeName());
