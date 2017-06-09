@@ -8,25 +8,29 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import koolpos.cn.goodsdisplayer.R;
 import koolpos.cn.goodsdisplayer.mvcModel.ProductCategory;
-import koolpos.cn.goodsdisplayer.mvcModel.ProductTestType;
 
 /**
  * Created by caroline on 2017/5/29.
  */
 
 public class CategoryPop extends PopupWindow {
-    public interface OnSPUSelectedListener{
+    public interface OnSPUSelectedListener {
         public void onSelected(ProductCategory categorySelect);
     }
+
     private Context mContext;
 
     private View view;
@@ -34,23 +38,23 @@ public class CategoryPop extends PopupWindow {
     private TextView btn_cancel;
     RecyclerView listCategroies;
 
-    public CategoryPop(Context mContext ,List<ProductCategory> typeList, final OnSPUSelectedListener listener) {
-
+    public CategoryPop(Context context, List<ProductCategory> typeList, final OnSPUSelectedListener listener) {
+        this.mContext=context;
         this.view = LayoutInflater.from(mContext).inflate(R.layout.layout_select_type, null);
         listCategroies = (RecyclerView) this.view.findViewById(R.id.list_spu);
         LinearLayoutManager titleLayoutManager = new LinearLayoutManager(mContext);
         titleLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
-        SpacesItemDecoration itemDecoration =new SpacesItemDecoration(10);
+        SpacesItemDecoration itemDecoration = new SpacesItemDecoration(10);
         listCategroies.setLayoutManager(titleLayoutManager);
         listCategroies.addItemDecoration(itemDecoration);
-        OnSPUSelectedListener onSPUSelectedListener =new OnSPUSelectedListener() {
+        OnSPUSelectedListener onSPUSelectedListener = new OnSPUSelectedListener() {
             @Override
-            public void onSelected(ProductCategory  categorySelect) {
+            public void onSelected(ProductCategory categorySelect) {
                 listener.onSelected(categorySelect);
                 dismiss();
             }
         };
-        CategoryAdapter typeAdapter=new CategoryAdapter(onSPUSelectedListener);
+        CategoryAdapter typeAdapter = new CategoryAdapter(onSPUSelectedListener);
         typeAdapter.setData(typeList);
         listCategroies.setAdapter(typeAdapter);
         // 设置外部可点击
@@ -92,13 +96,15 @@ public class CategoryPop extends PopupWindow {
         this.setAnimationStyle(R.style.take_photo_anim);
 
     }
-    public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.GoodTypeViewHolder>{
 
-        private List<ProductCategory> data=new ArrayList<>();
+    public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.GoodTypeViewHolder> {
+
+        private List<ProductCategory> data = new ArrayList<>();
         private int curIndex = -1;
         private OnSPUSelectedListener onSPUSelectedListener;
+
         public CategoryAdapter(OnSPUSelectedListener onSPUSelectedListener) {
-            this.onSPUSelectedListener=onSPUSelectedListener;
+            this.onSPUSelectedListener = onSPUSelectedListener;
         }
 
         public void setData(List<ProductCategory> data) {
@@ -107,12 +113,13 @@ public class CategoryPop extends PopupWindow {
             myNotifyDataSetChanged();
         }
 
-        public void myNotifyDataSetChanged(){
+        public void myNotifyDataSetChanged() {
             notifyDataSetChanged();
         }
+
         @Override
         public CategoryAdapter.GoodTypeViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View itemView= LayoutInflater.from(parent.getContext()).inflate(R.layout.item_good_title,parent,false);
+            View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_good_title, parent, false);
             return new CategoryAdapter.GoodTypeViewHolder(itemView);
         }
 
@@ -122,9 +129,9 @@ public class CategoryPop extends PopupWindow {
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (curIndex!=holder.getAdapterPosition()){
-                        curIndex =holder.getAdapterPosition();
-                        if (onSPUSelectedListener!=null){
+                    if (curIndex != holder.getAdapterPosition()) {
+                        curIndex = holder.getAdapterPosition();
+                        if (onSPUSelectedListener != null) {
                             onSPUSelectedListener.onSelected(dataTmp);
                         }
                         myNotifyDataSetChanged();
@@ -133,6 +140,13 @@ public class CategoryPop extends PopupWindow {
             });
             holder.good_type.setSelected(curIndex == position);
             holder.good_type.setText(data.get(position).getName());
+            Glide.with(mContext).load(data.get(position).getIconUrl())
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .placeholder(R.mipmap.downloading)
+                    .animate(R.anim.zoom_in)
+                    .fitCenter()
+                    .error(R.mipmap.download_error)
+                    .into(holder.category_icon);
         }
 
         @Override
@@ -140,11 +154,14 @@ public class CategoryPop extends PopupWindow {
             return data.size();
         }
 
-        class GoodTypeViewHolder extends RecyclerView.ViewHolder{
+        class GoodTypeViewHolder extends RecyclerView.ViewHolder {
             TextView good_type;
-            private GoodTypeViewHolder(View itemView){
+            ImageView category_icon;
+
+            private GoodTypeViewHolder(View itemView) {
                 super(itemView);
-                good_type= (TextView) itemView.findViewById(R.id.good_type);
+                good_type = (TextView) itemView.findViewById(R.id.good_type);
+                category_icon = (ImageView) itemView.findViewById(R.id.category_icon);
             }
         }
     }

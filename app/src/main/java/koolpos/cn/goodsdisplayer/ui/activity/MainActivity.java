@@ -186,7 +186,6 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                     @Override
                     public void onNext(final View.OnClickListener onClickListener) {
                         tvSelectType.setOnClickListener(onClickListener);
-                        //TODO　setGridAdapter(aidlApi,categorySelect);
                     }
                 });
     }
