@@ -7,12 +7,12 @@ import java.io.Serializable;
  *  ProductType是商品下的一个分类属性
  */
 
-public class ProductType implements Serializable{
+public class ProductTestType implements Serializable{
 
     private String typeName;
     private boolean isChecked;
 
-    public ProductType(String typeName){
+    public ProductTestType(String typeName){
         this.typeName=typeName;
     }
     public String getTypeName() {
@@ -31,7 +31,7 @@ public class ProductType implements Serializable{
         isChecked = checked;
     }
 
-    public boolean equals(ProductType obj) {
+    public boolean equals(ProductTestType obj) {
         return obj.getTypeName().equals(this.getTypeName());
     }
 }

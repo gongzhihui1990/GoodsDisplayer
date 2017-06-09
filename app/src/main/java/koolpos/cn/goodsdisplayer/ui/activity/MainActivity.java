@@ -1,9 +1,7 @@
 package koolpos.cn.goodsdisplayer.ui.activity;
 
-import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.Uri;
@@ -11,7 +9,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -30,98 +27,38 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import koolpos.cn.goodproviderservice.service.aidl.IGPService;
 import koolpos.cn.goodsdisplayer.MyApplication;
 import koolpos.cn.goodsdisplayer.R;
 import koolpos.cn.goodsdisplayer.api.AidlApi;
-import koolpos.cn.goodsdisplayer.mvcModel.ProductType;
-import koolpos.cn.goodsdisplayer.mvcModel.Goods;
-import koolpos.cn.goodsdisplayer.ui.adapter.DisplayCategoryAdapter;
+import koolpos.cn.goodsdisplayer.mvcModel.Product;
+import koolpos.cn.goodsdisplayer.mvcModel.ProductCategory;
+import koolpos.cn.goodsdisplayer.rxjava.ActivityObserver;
+import koolpos.cn.goodsdisplayer.ui.adapter.ProductAdapter;
 import koolpos.cn.goodsdisplayer.ui.fragment.DisplayGoodGroupFragment;
-import koolpos.cn.goodsdisplayer.ui.widget.SpacesItemDecoration;
-import koolpos.cn.goodsdisplayer.ui.widget.TypePopupWindow;
+import koolpos.cn.goodsdisplayer.ui.widget.CategoryPop;
+import koolpos.cn.goodsdisplayer.ui.widget.GridSpacingItemDecoration;
 import koolpos.cn.goodsdisplayer.util.AndroidUtils;
+import koolpos.cn.goodsdisplayer.util.Loger;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFragment.OnFragmentInteractionListener {
+public class MainActivity extends BaseActivity implements DisplayGoodGroupFragment.OnFragmentInteractionListener {
 
     @BindView(R.id.grid_content)
     RecyclerView gridContentView;
     @BindView(R.id.select_type)
     TextView tvSelectType;
-    /**
-     * 当前分类标记位
-     */
-    private int selectedIndex = -1;
-    /**
-     * 分类列表
-     */
-    private List<ProductType> types;
     ServiceConnection connection = new ServiceConnection() {
-        private AidlApi aidlApi;
-        private void getCategory(final DisplayCategoryAdapter gridAdapter){
-            try {
-                types = aidlApi.getTypeList();
-                if (selectedIndex == -1) {
-                    selectedIndex = 0;
-                    gridAdapter.setType(types.get(0).getTypeName());
-                }
-                tvSelectType.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        TypePopupWindow.OnSPUSelectedListener spuSelectedListener = new TypePopupWindow.OnSPUSelectedListener() {
-                            @Override
-                            public void onSelected(/*GoodType type,*/int index) {
-                                selectedIndex = index;
-                                ProductType type = types.get(selectedIndex);
-                                gridAdapter.setType(type.getTypeName());
-                            }
-                        };
-                        showPopFormBottom(types, selectedIndex, spuSelectedListener);
-                    }
-                });
-            } catch (Exception e) {
-                e.printStackTrace();
-                new AlertDialog.Builder(DisplayActivity.this)
-                        .setMessage(e.getMessage())
-                        .setCancelable(false)
-                        .setNegativeButton("退出", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                finish();
-                            }
-                        })
-                        .setPositiveButton("重试", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                getCategory(gridAdapter);
-                            }
-                        })
-                        .show();
-            }
-        }
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             IGPService gpService = IGPService.Stub.asInterface(iBinder);
-            aidlApi = new AidlApi(gpService);
-            final DisplayCategoryAdapter gridAdapter = new DisplayCategoryAdapter(aidlApi);
-            gridAdapter.setSkuDisplayCallBack(new DisplayCategoryAdapter.SkuDisplayDetailCall() {
-                @Override
-                public void show(Goods good) {
-                    stop();
-                    Intent intent = new Intent(getBaseContext(), ShowDetailActivity.class);
-                    intent.putExtra(Goods.class.getName(), good);
-                    startActivityForResult(intent, showSku);
-                }
-            });
-            SpacesItemDecoration decoration = new SpacesItemDecoration(20);
-            gridContentView.addItemDecoration(decoration);
-            gridContentView.setAdapter(gridAdapter);
-           getCategory(gridAdapter);
+            AidlApi aidlApi = new AidlApi(gpService);
+            initUI(aidlApi);
         }
 
         @Override
@@ -129,25 +66,6 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
         }
     };
 
-    private WindowManager.LayoutParams params;
-
-    private void showPopFormBottom(List<ProductType> data, int selectedIndex, TypePopupWindow.OnSPUSelectedListener spuSelectedListener) {
-        TypePopupWindow popupWindow = new TypePopupWindow(getBaseContext(), selectedIndex, data, spuSelectedListener);
-        popupWindow.showAtLocation(findViewById(R.id.main_view), Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
-        params = getWindow().getAttributes();
-        //当弹出Popupwindow时，背景变半透明
-        params.alpha = 0.7f;
-        getWindow().setAttributes(params);
-        //设置Popupwindow关闭监听，当Popupwindow关闭，背景恢复1f
-        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
-            @Override
-            public void onDismiss() {
-                params = getWindow().getAttributes();
-                params.alpha = 1f;
-                getWindow().setAttributes(params);
-            }
-        });
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -182,12 +100,103 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
     private final int showSku = 10;
     private final int showAd = 11;
 
+    private ProductAdapter productAdapter;
+    private void setGridAdapter(final AidlApi aidlApi,ProductCategory categorySelect){
+        if (productAdapter==null){
+            productAdapter=new ProductAdapter(aidlApi,this);
+            GridSpacingItemDecoration dividerGridItemDecoration =new GridSpacingItemDecoration(Integer.MAX_VALUE,20,true);
+            gridContentView.addItemDecoration(dividerGridItemDecoration);
+            gridContentView.setAdapter(productAdapter);
+            productAdapter.setSkuDisplayCallBack(new ProductAdapter.SkuDisplayDetailCall() {
+                @Override
+                public void show(Product product) {
+                    stop();
+                    Intent intent = new Intent(getBaseContext(), ShowDetailActivity.class);
+                    intent.putExtra(Product.class.getName(), product);
+                    startActivityForResult(intent, showSku);
+                }
+            });
+        }
+        productAdapter.setCategory(categorySelect);
+    }
+    private void initUI(final AidlApi aidlApi) {
+        Observable.just(aidlApi)
+                .map(new Function<AidlApi, List<ProductCategory>>() {
+                    @Override
+                    public List<ProductCategory> apply(@NonNull AidlApi aidlApi) throws Exception {
+                        return aidlApi.getCategoryList();
+                    }
+                }).map(new Function<List<ProductCategory>, CategoryPop>() {
+            @Override
+            public CategoryPop apply(@NonNull List<ProductCategory> productCategories) throws Exception {
+                CategoryPop.OnSPUSelectedListener spuSelectedListener = new CategoryPop.OnSPUSelectedListener() {
+                    @Override
+                    public void onSelected(ProductCategory categorySelect) {
+                        //TODO gridAdapter.setCategory(type.getTypeName());
+                        Loger.i("categorySelect:" + categorySelect.toString());
+                        //gridAdapter.setCategory(type.getTypeName());
+                        setGridAdapter(aidlApi,categorySelect);
+                    }
+                };
+                Observable.just( productCategories.get(0))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Consumer<ProductCategory>() {
+                            @Override
+                            public void accept(@NonNull ProductCategory category) throws Exception {
+                                setGridAdapter(aidlApi,category);
+                            }
+                        });
+                return new CategoryPop(getBaseContext(), productCategories, spuSelectedListener);
+            }
+        }).map(new Function<CategoryPop, View.OnClickListener>() {
+            @Override
+            public View.OnClickListener apply(@NonNull final CategoryPop pop) throws Exception {
+                return new View.OnClickListener() {
+                    /**
+                     * 当弹出时，背景变半透明
+                     * @param alpha
+                     */
+                    private void setBackgroundAlpha(float alpha) {
+                        WindowManager.LayoutParams layoutParams = getWindow().getAttributes();
+                        layoutParams.alpha = alpha;
+                        getWindow().setAttributes(layoutParams);
+                    }
+
+                    private void showCategoryPop(CategoryPop popupWindow) {
+                        popupWindow.showAtLocation(findViewById(R.id.main_view), Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
+                        setBackgroundAlpha(0.6f);
+                        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+                            @Override
+                            public void onDismiss() {
+                                setBackgroundAlpha(1f);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onClick(View v) {
+                        showCategoryPop(pop);
+                    }
+                };
+            }
+        }).observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new ActivityObserver<View.OnClickListener>(MainActivity.this) {
+                    @Override
+                    public void onNext(final View.OnClickListener onClickListener) {
+                        tvSelectType.setOnClickListener(onClickListener);
+                        //TODO　setGridAdapter(aidlApi,categorySelect);
+                    }
+                });
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == showSku) {
             startDisplay();
         }
-        if (requestCode == showAd){
+        if (requestCode == showAd) {
             startCountingAd();
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -278,15 +287,16 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
     @Override
     protected void onPause() {
         super.onPause();
-        if (mAdSubscribe!=null){
+        if (mAdSubscribe != null) {
             mAdSubscribe.dispose();
         }
     }
 
-    private int adWaitingPeriod = 30 ;
+    private int adWaitingPeriod = 30;
+
     //adWaitingPeriod d秒后 播放广播
-    private void startCountingAd(){
-        if (mAdSubscribe!=null){
+    private void startCountingAd() {
+        if (mAdSubscribe != null) {
             mAdSubscribe.dispose();
         }
         mAdSubscribe = Observable.timer(adWaitingPeriod, TimeUnit.SECONDS)
@@ -295,8 +305,8 @@ public class DisplayActivity extends BaseActivity implements DisplayGoodGroupFra
                 .subscribe(new Consumer<Long>() {
                     @Override
                     public void accept(@NonNull Long aLong) throws Exception {
-                        Intent intent =new Intent(getBaseContext(),AdVideoDisplayActivity.class);
-                        startActivityForResult(intent,showAd);
+                        Intent intent = new Intent(getBaseContext(), AdVideoDisplayActivity.class);
+                        startActivityForResult(intent, showAd);
                         mAdSubscribe.dispose();
                     }
                 });

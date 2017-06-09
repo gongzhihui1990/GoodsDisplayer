@@ -10,7 +10,6 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,18 +24,20 @@ import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import koolpos.cn.goodsdisplayer.R;
 import koolpos.cn.goodsdisplayer.api.AidlApi;
-import koolpos.cn.goodsdisplayer.api.SkuTypeManger;
-import koolpos.cn.goodsdisplayer.mvcModel.Goods;
-import koolpos.cn.goodsdisplayer.util.FileUtil;
+import koolpos.cn.goodsdisplayer.api.CategoryManger;
+import koolpos.cn.goodsdisplayer.mvcModel.Product;
+import koolpos.cn.goodsdisplayer.mvcModel.ProductCategory;
+import koolpos.cn.goodsdisplayer.rxjava.ActivityObserver;
+import koolpos.cn.goodsdisplayer.ui.activity.BaseActivity;
 import koolpos.cn.goodsdisplayer.util.Loger;
 
 /**
  * Created by caroline on 2017/6/1.
  */
 
-public class DisplayCategoryAdapter extends RecyclerView.Adapter<DisplayCategoryAdapter.ItemViewHolder> implements SkuTypeManger {
+public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ItemViewHolder> implements CategoryManger {
     private boolean fillMode = true;//填满格子
-    private Goods[] fillModeItems;
+    private Product[] fillModeItems;
 
     class ItemViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.item_a_big)
@@ -95,52 +96,44 @@ public class DisplayCategoryAdapter extends RecyclerView.Adapter<DisplayCategory
 
                         }
                     });
-//            WindowManager wm = (WindowManager) itemView.getContext()
-//                    .getSystemService(Context.WINDOW_SERVICE);
-//
-//            int width = wm.getDefaultDisplay().getWidth();
-//            int height = wm.getDefaultDisplay().getHeight();
-//            Loger.d("h-w:"+height+"-"+width);
-//            ViewGroup.LayoutParams lp = itemView.getLayoutParams();
-//            lp.height= (int) (height*0.35);
-//            lp.width = lp.height*51/25;
-//            itemView.setLayoutParams(lp);
         }
     }
 
-    private List<Goods[]> goodGroups = new ArrayList<>();
+    private List<Product[]> goodGroups = new ArrayList<>();
     private final int GroupSize = 10;
 
     private AidlApi aidlApi;
 
-    public DisplayCategoryAdapter(AidlApi aidlApi) {
+    private BaseActivity mActivity;
+    public ProductAdapter(AidlApi aidlApi, BaseActivity baseActivity) {
         this.aidlApi = aidlApi;
+        this.mActivity=baseActivity;
     }
 
     @Override
-    public void setType(String type) {
-        Loger.d("setType");
-        Observable.just(type)
-                .map(new Function<String, List<Goods>>() {
+    public void setCategory(ProductCategory category) {
+        Loger.d("setCategory");
+        Observable.just(category)
+                .map(new Function<ProductCategory, List<Product>>() {
                     @Override
-                    public List<Goods> apply(@NonNull String type) throws Exception {
-                        List<Goods> dataList = aidlApi.getListByType(type);
+                    public List<Product> apply(@NonNull ProductCategory category) throws Exception {
+                        List<Product> dataList = aidlApi.getProductList(category);
                         fillModeItems = null;
                         return dataList;
                     }
                 })
-                .map(new Function<List<Goods>, List<Goods[]>>() {
+                .map(new Function<List<Product>, List<Product[]>>() {
                     @Override
-                    public List<Goods[]> apply(@NonNull List<Goods> dataList) throws Exception {
-                        List<Goods[]> goodsGroupTmp = new ArrayList<Goods[]>();
+                    public List<Product[]> apply(@NonNull List<Product> dataList) throws Exception {
+                        List<Product[]> goodsGroupTmp = new ArrayList<Product[]>();
                         Loger.d("size:" + dataList.size());
                         int dataListSizeNow = dataList.size();
                         int index = 0;
                         //新建数组的大小
                         int itemSize = dataListSizeNow < GroupSize ? dataListSizeNow : GroupSize;
                         Loger.d("初始单页的大小:" + itemSize);
-                        Goods[] group = new Goods[itemSize];
-                        for (Goods item : dataList) {
+                        Product[] group = new Product[itemSize];
+                        for (Product item : dataList) {
                             //赋值项到单页数组
                             group[index] = item;
 
@@ -153,7 +146,7 @@ public class DisplayCategoryAdapter extends RecyclerView.Adapter<DisplayCategory
                                 //新建单页的大小
                                 itemSize = dataListSizeNow < GroupSize ? dataListSizeNow - 1 : GroupSize;
                                 Loger.d("新建单页的大小:" + itemSize);
-                                group = new Goods[itemSize];
+                                group = new Product[itemSize];
                                 index = 0;
                             } else {
                                 index++;
@@ -164,25 +157,17 @@ public class DisplayCategoryAdapter extends RecyclerView.Adapter<DisplayCategory
                     }
                 })
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io()).subscribe(new Observer<List<Goods[]>>() {
-            @Override
-            public void onSubscribe(Disposable d) {
-
-            }
+                .subscribeOn(Schedulers.io()).subscribe(new ActivityObserver<List<Product[]>>(mActivity) {
 
             @Override
-            public void onNext(List<Goods[]> goodsGroupTmp) {
+            public void onNext(List<Product[]> goodsGroupTmp) {
                 goodGroups.clear();
                 goodGroups.addAll(goodsGroupTmp);
             }
 
             @Override
-            public void onError(Throwable e) {
-
-            }
-
-            @Override
             public void onComplete() {
+                super.onComplete();
                 notifyDataSetChanged();
             }
         });
@@ -197,8 +182,8 @@ public class DisplayCategoryAdapter extends RecyclerView.Adapter<DisplayCategory
 
     @Override
     public void onBindViewHolder(ItemViewHolder holder, int position) {
-        Goods[] goodsTmp = goodGroups.get(position);
-        Goods[] goods = new Goods[10];
+        Product[] goodsTmp = goodGroups.get(position);
+        Product[] goods = new Product[10];
         Loger.d("goodsTmp len="+goodsTmp.length);
         for (int i=0;i<goods.length;i++){
             if (i<goodsTmp.length){
@@ -268,7 +253,7 @@ public class DisplayCategoryAdapter extends RecyclerView.Adapter<DisplayCategory
     }
 
     public interface SkuDisplayDetailCall {
-        public void show(Goods good);
+        public void show(Product good);
     }
 
     SkuDisplayDetailCall call;
@@ -277,7 +262,7 @@ public class DisplayCategoryAdapter extends RecyclerView.Adapter<DisplayCategory
         this.call = call;
     }
 
-    private void renderGood(final View view, final Goods good) {
+    private void renderGood(final View view, final Product good) {
         if (good == null) {
             view.setVisibility(View.INVISIBLE);
             return;
@@ -302,9 +287,8 @@ public class DisplayCategoryAdapter extends RecyclerView.Adapter<DisplayCategory
                 ivGood.setPadding(20, 20, 20, 20);
                 break;
         }
-        try {
             Glide.with(view.getContext())
-                    .load(FileUtil.getImageCashFile(good.getImage_url()))
+                    .load(good.getPicUrl())
                     //               .load(itemGood.getImage_url())
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .placeholder(R.mipmap.downloading)
@@ -312,11 +296,8 @@ public class DisplayCategoryAdapter extends RecyclerView.Adapter<DisplayCategory
                     .fitCenter()
                     .error(R.mipmap.download_error)
                     .into(ivGood);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
         TextView tvGood = (TextView) view.findViewById(R.id.good_name);
-        tvGood.setText(good.getGoods_name().substring(0,5));
+        tvGood.setText(good.getTitle());
     }
 
     @Override

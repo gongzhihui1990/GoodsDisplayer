@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -24,7 +23,7 @@ import butterknife.BindView;
 import koolpos.cn.goodproviderservice.service.aidl.IGPService;
 import koolpos.cn.goodsdisplayer.R;
 import koolpos.cn.goodsdisplayer.api.AidlApi;
-import koolpos.cn.goodsdisplayer.mvcModel.ProductType;
+import koolpos.cn.goodsdisplayer.mvcModel.ProductTestType;
 import koolpos.cn.goodsdisplayer.mvcModel.Goods;
 import koolpos.cn.goodsdisplayer.util.AndroidUtils;
 import koolpos.cn.goodsdisplayer.util.Loger;
@@ -65,9 +64,9 @@ public class FullscreenActivityOld extends BaseActivity {
 //                String response =gpService.proxyPost(request.toString());
 //                Loger.d("response:"+response);
 
-//                case "local/get/getListByType":
+//                case "local/get/getTestListByType":
 //                    String type = reqJson.optString("type");
-//                    response.setData(getListByType(type));
+//                    response.setData(getTestListByType(type));
 //                    break;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -119,7 +118,7 @@ public class FullscreenActivityOld extends BaseActivity {
         public void setDataByType(String type) {
             data.clear();
             try {
-                data = aidlApi.getListByType(type);
+                data = aidlApi.getTestListByType(type);
                 notifyDataSetChanged();
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -153,14 +152,14 @@ public class FullscreenActivityOld extends BaseActivity {
     }
     public class GoodTypeAdapter extends RecyclerView.Adapter<GoodTypeAdapter.GoodTypeViewHolder>{
 
-        private List<ProductType> data=new ArrayList<>();
+        private List<ProductTestType> data=new ArrayList<>();
         private int curIndex = 0;
         private GoodContentAdapter gridAdapter;
         public GoodTypeAdapter(GoodContentAdapter gridAdapter) {
             this.gridAdapter=gridAdapter;
         }
 
-        public void setData(List<ProductType> data) {
+        public void setData(List<ProductTestType> data) {
             this.data = data;
             myNotifyDataSetChanged();
         }

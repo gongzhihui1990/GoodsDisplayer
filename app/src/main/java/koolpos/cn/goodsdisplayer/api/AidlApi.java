@@ -1,6 +1,5 @@
 package koolpos.cn.goodsdisplayer.api;
 
-import android.app.AlertDialog;
 import android.os.RemoteException;
 
 import com.google.gson.Gson;
@@ -14,7 +13,9 @@ import java.util.List;
 
 import koolpos.cn.goodproviderservice.service.aidl.IGPService;
 import koolpos.cn.goodsdisplayer.mvcModel.AidlResponse;
-import koolpos.cn.goodsdisplayer.mvcModel.ProductType;
+import koolpos.cn.goodsdisplayer.mvcModel.Product;
+import koolpos.cn.goodsdisplayer.mvcModel.ProductCategory;
+import koolpos.cn.goodsdisplayer.mvcModel.ProductTestType;
 import koolpos.cn.goodsdisplayer.mvcModel.Goods;
 import koolpos.cn.goodsdisplayer.util.Loger;
 
@@ -27,26 +28,30 @@ public class AidlApi {
     public AidlApi(IGPService service){
         this.service=service;
     }
-    public List<ProductType> getTypeList() throws Exception{
+    public List<ProductTestType> getTypeList() throws Exception{
         JSONObject request=new JSONObject();
         request.put("action","local/get/getTypeList");
         AidlResponse response =proxyPost(request.toString());
         if (response.getCode()!=0){
+            Loger.d("throw exception");
             throw new Exception(response.getMessage());
         }
+        Loger.d("response code  : "+response.getCode());
+
         String data=response.getData();
         List<String> typeList =  new Gson().fromJson(data,
                 new TypeToken<List<String>>() {
                 }.getType());
-        List<ProductType> ptList=new ArrayList<>();
+        List<ProductTestType> ptList=new ArrayList<>();
         for (String type:typeList) {
-            ptList.add(new ProductType(type));
+            ptList.add(new ProductTestType(type));
         }
         return ptList;
     }
-    public List<Goods> getListByType(String type) throws JSONException {
+    //
+    public List<Goods> getTestListByType(String type) throws JSONException {
         JSONObject request=new JSONObject();
-        request.put("action","local/get/getListByType");
+        request.put("action","local/get/getTestListByType");
         request.put("type",type);
         AidlResponse response = proxyPost(request.toString());
         List<Goods> goodsList =  new Gson().fromJson(response.getData(),
@@ -54,10 +59,33 @@ public class AidlApi {
                 }.getType());
         return goodsList;
     }
-    //                case "local/get/getListByType":
-//                    String type = reqJson.optString("type");
-//                    response.setData(getListByType(type));
-//                    break;
+
+    /**
+     *
+     * @return
+     * @throws Exception
+     */
+    public List<ProductCategory> getCategoryList() throws Exception {
+        JSONObject request=new JSONObject();
+        request.put("action","local/get/category");
+        AidlResponse response = proxyPost(request.toString());
+        List<ProductCategory> categories =  new Gson().fromJson(response.getData(),
+                new TypeToken<List<ProductCategory>>() {
+                }.getType());
+        return categories;
+    }
+
+    public List<Product> getProductList(ProductCategory category) throws JSONException {
+        JSONObject request=new JSONObject();
+        request.put("action","local/get/products");
+        request.put("categoryId",category.getCategoryId());
+        AidlResponse response = proxyPost(request.toString());
+        List<Product> goodsList =  new Gson().fromJson(response.getData(),
+                new TypeToken<List<Product>>() {
+                }.getType());
+        return goodsList;
+    }
+
     private AidlResponse proxyPost(String request){
         String response = "";
         try {

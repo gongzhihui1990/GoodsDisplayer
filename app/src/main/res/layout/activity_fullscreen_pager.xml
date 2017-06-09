@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/main_bg"
     android:orientation="vertical"
-    tools:context="koolpos.cn.goodsdisplayer.ui.activity.DisplayActivity">
+    tools:context="koolpos.cn.goodsdisplayer.ui.activity.MainActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"

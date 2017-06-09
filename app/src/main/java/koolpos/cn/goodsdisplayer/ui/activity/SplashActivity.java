@@ -18,7 +18,6 @@ import koolpos.cn.goodsdisplayer.util.Loger;
 import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 import static android.Manifest.permission.ACCESS_WIFI_STATE;
 import static android.Manifest.permission.INTERNET;
-import static android.Manifest.permission.READ_CONTACTS;
 import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
@@ -67,7 +66,7 @@ public class SplashActivity extends BaseActivity {
         if (!mayRequestInternet()) {
             return;
         }
-        startActivity(new Intent(getBaseContext(),DisplayActivity.class));
+        startActivity(new Intent(getBaseContext(),MainActivity.class));
         finish();
     }
     /**

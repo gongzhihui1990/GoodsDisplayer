@@ -16,43 +16,43 @@ import java.util.ArrayList;
 import java.util.List;
 
 import koolpos.cn.goodsdisplayer.R;
-import koolpos.cn.goodsdisplayer.mvcModel.ProductType;
+import koolpos.cn.goodsdisplayer.mvcModel.ProductCategory;
+import koolpos.cn.goodsdisplayer.mvcModel.ProductTestType;
 
 /**
  * Created by caroline on 2017/5/29.
  */
 
-public class TypePopupWindow extends PopupWindow {
+public class CategoryPop extends PopupWindow {
     public interface OnSPUSelectedListener{
-        public void onSelected(int index);
+        public void onSelected(ProductCategory categorySelect);
     }
     private Context mContext;
 
     private View view;
 
     private TextView btn_cancel;
-//    @BindView(R.id.list_content_title)
-    RecyclerView listSPU;
+    RecyclerView listCategroies;
 
-    public TypePopupWindow(Context mContext, int  selectedIndex, List<ProductType> typeList, final OnSPUSelectedListener listener) {
+    public CategoryPop(Context mContext ,List<ProductCategory> typeList, final OnSPUSelectedListener listener) {
 
         this.view = LayoutInflater.from(mContext).inflate(R.layout.layout_select_type, null);
-        listSPU = (RecyclerView) this.view.findViewById(R.id.list_spu);
+        listCategroies = (RecyclerView) this.view.findViewById(R.id.list_spu);
         LinearLayoutManager titleLayoutManager = new LinearLayoutManager(mContext);
         titleLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         SpacesItemDecoration itemDecoration =new SpacesItemDecoration(10);
-        listSPU.setLayoutManager(titleLayoutManager);
-        listSPU.addItemDecoration(itemDecoration);
+        listCategroies.setLayoutManager(titleLayoutManager);
+        listCategroies.addItemDecoration(itemDecoration);
         OnSPUSelectedListener onSPUSelectedListener =new OnSPUSelectedListener() {
             @Override
-            public void onSelected(int  selectedIndex) {
-                listener.onSelected(selectedIndex);
+            public void onSelected(ProductCategory  categorySelect) {
+                listener.onSelected(categorySelect);
                 dismiss();
             }
         };
-        GoodTypeAdapter typeAdapter=new GoodTypeAdapter(onSPUSelectedListener);
-        typeAdapter.setData(typeList,selectedIndex);
-        listSPU.setAdapter(typeAdapter);
+        CategoryAdapter typeAdapter=new CategoryAdapter(onSPUSelectedListener);
+        typeAdapter.setData(typeList);
+        listCategroies.setAdapter(typeAdapter);
         // 设置外部可点击
         this.setOutsideTouchable(true);
         // mMenuView添加OnTouchListener监听判断获取触屏位置如果在选择框外面则销毁弹出框
@@ -92,48 +92,47 @@ public class TypePopupWindow extends PopupWindow {
         this.setAnimationStyle(R.style.take_photo_anim);
 
     }
-    public class GoodTypeAdapter extends RecyclerView.Adapter<TypePopupWindow.GoodTypeAdapter.GoodTypeViewHolder>{
+    public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.GoodTypeViewHolder>{
 
-        private List<ProductType> data=new ArrayList<>();
+        private List<ProductCategory> data=new ArrayList<>();
         private int curIndex = -1;
         private OnSPUSelectedListener onSPUSelectedListener;
-        public GoodTypeAdapter(OnSPUSelectedListener onSPUSelectedListener) {
+        public CategoryAdapter(OnSPUSelectedListener onSPUSelectedListener) {
             this.onSPUSelectedListener=onSPUSelectedListener;
         }
 
-        public void setData(List<ProductType> data, int selectedIndex) {
+        public void setData(List<ProductCategory> data) {
             this.data = data;
-            this.curIndex =selectedIndex;
+            this.curIndex = 0;
             myNotifyDataSetChanged();
         }
 
         public void myNotifyDataSetChanged(){
-            //mGridAdapter.setDataByType(data.get(curIndex).getTypeName());
             notifyDataSetChanged();
         }
         @Override
-        public TypePopupWindow.GoodTypeAdapter.GoodTypeViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public CategoryAdapter.GoodTypeViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View itemView= LayoutInflater.from(parent.getContext()).inflate(R.layout.item_good_title,parent,false);
-            return new TypePopupWindow.GoodTypeAdapter.GoodTypeViewHolder(itemView);
+            return new CategoryAdapter.GoodTypeViewHolder(itemView);
         }
 
         @Override
-        public void onBindViewHolder(final TypePopupWindow.GoodTypeAdapter.GoodTypeViewHolder holder, int position) {
-            ProductType dataTmp = data.get(position);
+        public void onBindViewHolder(final CategoryAdapter.GoodTypeViewHolder holder, int position) {
+            final ProductCategory dataTmp = data.get(position);
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     if (curIndex!=holder.getAdapterPosition()){
                         curIndex =holder.getAdapterPosition();
                         if (onSPUSelectedListener!=null){
-                            onSPUSelectedListener.onSelected(curIndex);
+                            onSPUSelectedListener.onSelected(dataTmp);
                         }
                         myNotifyDataSetChanged();
                     }
                 }
             });
             holder.good_type.setSelected(curIndex == position);
-            holder.good_type.setText(data.get(position).getTypeName());
+            holder.good_type.setText(data.get(position).getName());
         }
 
         @Override

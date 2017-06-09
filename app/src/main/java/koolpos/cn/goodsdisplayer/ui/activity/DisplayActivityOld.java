@@ -43,12 +43,12 @@ import koolpos.cn.goodproviderservice.service.aidl.IGPService;
 import koolpos.cn.goodsdisplayer.MyApplication;
 import koolpos.cn.goodsdisplayer.R;
 import koolpos.cn.goodsdisplayer.api.AidlApi;
-import koolpos.cn.goodsdisplayer.mvcModel.ProductType;
+import koolpos.cn.goodsdisplayer.mvcModel.ProductTestType;
 import koolpos.cn.goodsdisplayer.mvcModel.Goods;
 import koolpos.cn.goodsdisplayer.ui.fragment.DisplayGoodGroupFragment;
 import koolpos.cn.goodsdisplayer.ui.widget.BounceBackViewPager;
 import koolpos.cn.goodsdisplayer.ui.widget.FixedSpeedScroller;
-import koolpos.cn.goodsdisplayer.ui.widget.TypePopupWindow;
+import koolpos.cn.goodsdisplayer.ui.widget.TestTypePopupWindow;
 import koolpos.cn.goodsdisplayer.util.AndroidUtils;
 import koolpos.cn.goodsdisplayer.util.Loger;
 
@@ -76,7 +76,7 @@ public class DisplayActivityOld extends BaseActivity implements DisplayGoodGroup
     /**
      * 分类列表
      */
-    private List<ProductType> types;
+    private List<ProductTestType> types;
     ServiceConnection connection =new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
@@ -90,11 +90,11 @@ public class DisplayActivityOld extends BaseActivity implements DisplayGoodGroup
                 tvSelectType.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        TypePopupWindow.OnSPUSelectedListener spuSelectedListener=new TypePopupWindow.OnSPUSelectedListener() {
+                        TestTypePopupWindow.OnSPUSelectedListener spuSelectedListener=new TestTypePopupWindow.OnSPUSelectedListener() {
                             @Override
                             public void onSelected(/*GoodType type,*/int index) {
                                 selectedIndex=index;
-                                ProductType type = types.get(selectedIndex);
+                                ProductTestType type = types.get(selectedIndex);
                                 Loger.d("type=="+type.getTypeName());
                                 gridAdapter.setDataByType(type.getTypeName());
                             }
@@ -113,8 +113,8 @@ public class DisplayActivityOld extends BaseActivity implements DisplayGoodGroup
     };
 
     private WindowManager.LayoutParams params;
-    private void showPopFormBottom(List<ProductType> data, int selectedIndex, TypePopupWindow.OnSPUSelectedListener spuSelectedListener){
-        TypePopupWindow popupWindow=new TypePopupWindow(getBaseContext(),selectedIndex,data,spuSelectedListener);
+    private void showPopFormBottom(List<ProductTestType> data, int selectedIndex, TestTypePopupWindow.OnSPUSelectedListener spuSelectedListener){
+        TestTypePopupWindow popupWindow=new TestTypePopupWindow(getBaseContext(),selectedIndex,data,spuSelectedListener);
         popupWindow.showAtLocation(findViewById(R.id.main_view), Gravity.BOTTOM|Gravity.CENTER_HORIZONTAL, 0, 0);
         params = getWindow().getAttributes();
         //当弹出Popupwindow时，背景变半透明
@@ -350,7 +350,7 @@ public class DisplayActivityOld extends BaseActivity implements DisplayGoodGroup
         public void setDataByType(String type) {
             goodsGroup.clear();
                 try {
-                    List <Goods> dataList = aidlApi.getListByType(type);
+                    List <Goods> dataList = aidlApi.getTestListByType(type);
                     Loger.d("dataList size:"+dataList.size());
                     int dataListSizeNow=dataList.size();
                     int index=0;
@@ -384,14 +384,14 @@ public class DisplayActivityOld extends BaseActivity implements DisplayGoodGroup
 
     public class GoodTypeAdapter extends RecyclerView.Adapter<GoodTypeAdapter.GoodTypeViewHolder>{
 
-        private List<ProductType> data=new ArrayList<>();
+        private List<ProductTestType> data=new ArrayList<>();
         private int curIndex = 0;
         private ViewPagerAdapter mGridAdapter;
         private GoodTypeAdapter(ViewPagerAdapter gridAdapter) {
             this.mGridAdapter=gridAdapter;
         }
 
-        public void setData(List<ProductType> data) {
+        public void setData(List<ProductTestType> data) {
             this.data = data;
             myNotifyDataSetChanged();
         }
