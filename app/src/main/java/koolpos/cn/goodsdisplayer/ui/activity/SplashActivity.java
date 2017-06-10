@@ -11,8 +11,14 @@ import android.support.design.widget.Snackbar;
 import android.view.View;
 import android.widget.TextView;
 
+import java.util.concurrent.TimeUnit;
+
 import butterknife.BindView;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import koolpos.cn.goodsdisplayer.R;
+import koolpos.cn.goodsdisplayer.rxjava.ActivityObserver;
 import koolpos.cn.goodsdisplayer.util.Loger;
 
 import static android.Manifest.permission.ACCESS_NETWORK_STATE;
@@ -28,17 +34,27 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 public class SplashActivity extends BaseActivity {
     @BindView(R.id.tv_hint_common)
     TextView tv_hint_common;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-        populateAutoComplete();
+        Observable.timer(1, TimeUnit.SECONDS)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new ActivityObserver<Long>(this) {
+                    @Override
+                    public void onNext(Long aLong) {
+                        populateAutoComplete();
+                    }
+                });
     }
 
     /**
      * Id to identity READ_CONTACTS permission request.
      */
     private static final int REQUEST_PERMISSIONS = 0;
+
     private boolean mayRequestInternet() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             return true;
@@ -46,7 +62,7 @@ public class SplashActivity extends BaseActivity {
         if (checkSelfPermission(READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
             return true;
         }
-        final String[] permissions={INTERNET,WRITE_EXTERNAL_STORAGE,ACCESS_NETWORK_STATE,ACCESS_WIFI_STATE,READ_PHONE_STATE};
+        final String[] permissions = {INTERNET, WRITE_EXTERNAL_STORAGE, ACCESS_NETWORK_STATE, ACCESS_WIFI_STATE, READ_PHONE_STATE};
         if (shouldShowRequestPermissionRationale(READ_PHONE_STATE)) {
             Snackbar.make(tv_hint_common, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
                     .setAction(android.R.string.ok, new View.OnClickListener() {
@@ -61,14 +77,15 @@ public class SplashActivity extends BaseActivity {
         }
         return false;
     }
+
     private void populateAutoComplete() {
-        Loger.d("populateAutoComplete "+mayRequestInternet());
+        Loger.d("populateAutoComplete " + mayRequestInternet());
         if (!mayRequestInternet()) {
             return;
         }
-        startActivity(new Intent(getBaseContext(),MainActivity.class));
-        finish();
+        toMainPage();
     }
+
     /**
      * Callback received when a permissions request has been completed.
      */
@@ -80,5 +97,10 @@ public class SplashActivity extends BaseActivity {
                 populateAutoComplete();
             }
         }
+    }
+
+    private void toMainPage() {
+        startActivity(new Intent(getBaseContext(), MainActivity.class));
+        finish();
     }
 }

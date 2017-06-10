@@ -13,7 +13,15 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
+import java.util.concurrent.TimeUnit;
+
 import butterknife.BindView;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
 import koolpos.cn.goodsdisplayer.R;
 import koolpos.cn.goodsdisplayer.mvcModel.Product;
 import koolpos.cn.goodsdisplayer.util.CodeBitmap;
@@ -48,11 +56,10 @@ public class ShowDetailActivity extends BaseActivity {
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                onBackPressed();
             }
         });
         renderView(product);
-
     }
 
     private void showQrCode(ImageView imageView, String url) {
@@ -112,5 +119,52 @@ public class ShowDetailActivity extends BaseActivity {
         leftView.startAnimation(animatorLeft);
         rightView.startAnimation(animatorRight);
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (true){
+            onBackPressed();
+            return;
+        }
+        Animation animatorLeft = AnimationUtils.loadAnimation(getBaseContext(), R.anim.show_enter_left_anim);
+        animatorLeft.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                leftView.setVisibility(View.GONE);
+            }
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+        });
+        Animation animatorRight = AnimationUtils.loadAnimation(getBaseContext(), R.anim.show_enter_right_anim);
+        animatorRight.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                rightView.setVisibility(View.GONE);
+            }
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+        });
+        leftView.startAnimation(animatorLeft);
+        rightView.startAnimation(animatorRight);
+
+        Observable.timer(1100, TimeUnit.MILLISECONDS)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<Long>() {
+                    @Override
+                    public void accept(@NonNull Long aLong) throws Exception {
+                        finish();
+                    }
+                });
     }
 }

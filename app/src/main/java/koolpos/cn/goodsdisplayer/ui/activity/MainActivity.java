@@ -1,12 +1,8 @@
 package koolpos.cn.goodsdisplayer.ui.activity;
 
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
@@ -29,7 +25,6 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
-import koolpos.cn.goodproviderservice.service.aidl.IGPService;
 import koolpos.cn.goodsdisplayer.MyApplication;
 import koolpos.cn.goodsdisplayer.R;
 import koolpos.cn.goodsdisplayer.api.AidlApi;
@@ -40,7 +35,6 @@ import koolpos.cn.goodsdisplayer.ui.adapter.ProductAdapter;
 import koolpos.cn.goodsdisplayer.ui.fragment.DisplayGoodGroupFragment;
 import koolpos.cn.goodsdisplayer.ui.widget.CategoryPop;
 import koolpos.cn.goodsdisplayer.ui.widget.GridSpacingItemDecoration;
-import koolpos.cn.goodsdisplayer.util.AndroidUtils;
 import koolpos.cn.goodsdisplayer.util.Loger;
 
 /**
@@ -53,19 +47,6 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
     RecyclerView gridContentView;
     @BindView(R.id.select_type)
     TextView tvSelectType;
-    ServiceConnection connection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            IGPService gpService = IGPService.Stub.asInterface(iBinder);
-            AidlApi aidlApi = new AidlApi(gpService);
-            initUI(aidlApi);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-        }
-    };
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,9 +54,7 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
         setContentView(R.layout.activity_fullscreen);
         Glide.with(MyApplication.getContext()).resumeRequests();
         gridContentView.setLayoutManager(new LinearLayoutManager(getBaseContext(), LinearLayoutManager.HORIZONTAL, false));
-        Intent serviceIntent = new Intent(IGPService.class.getName());
-        serviceIntent = AndroidUtils.getExplicitIntent(getBaseContext(), serviceIntent);
-        boolean bindService = bindService(serviceIntent, connection, Context.BIND_AUTO_CREATE);
+        initUI(MyApplication.AIDLApi);
         startDisplay();
         startCountingAd();
         gridContentView.setOnTouchListener(new View.OnTouchListener() {
@@ -101,10 +80,11 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
     private final int showAd = 11;
 
     private ProductAdapter productAdapter;
-    private void setGridAdapter(final AidlApi aidlApi,ProductCategory categorySelect){
-        if (productAdapter==null){
-            productAdapter=new ProductAdapter(aidlApi,this);
-            GridSpacingItemDecoration dividerGridItemDecoration =new GridSpacingItemDecoration(Integer.MAX_VALUE,20,true);
+
+    private void setGridAdapter(final AidlApi aidlApi, ProductCategory categorySelect) {
+        if (productAdapter == null) {
+            productAdapter = new ProductAdapter(aidlApi, this);
+            GridSpacingItemDecoration dividerGridItemDecoration = new GridSpacingItemDecoration(Integer.MAX_VALUE, 20, true);
             gridContentView.addItemDecoration(dividerGridItemDecoration);
             gridContentView.setAdapter(productAdapter);
             productAdapter.setSkuDisplayCallBack(new ProductAdapter.SkuDisplayDetailCall() {
@@ -119,6 +99,7 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
         }
         productAdapter.setCategory(categorySelect);
     }
+
     private void initUI(final AidlApi aidlApi) {
         Observable.just(aidlApi)
                 .map(new Function<AidlApi, List<ProductCategory>>() {
@@ -135,16 +116,17 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                         //TODO gridAdapter.setCategory(type.getTypeName());
                         Loger.i("categorySelect:" + categorySelect.toString());
                         //gridAdapter.setCategory(type.getTypeName());
-                        setGridAdapter(aidlApi,categorySelect);
+                        setGridAdapter(aidlApi, categorySelect);
                     }
                 };
-                Observable.just( productCategories.get(0))
+                Observable.just(productCategories.get(0))
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Consumer<ProductCategory>() {
                             @Override
                             public void accept(@NonNull ProductCategory category) throws Exception {
-                                setGridAdapter(aidlApi,category);
+                                setGridAdapter(aidlApi, category);
+                                startCountingAd();
                             }
                         });
                 return new CategoryPop(getBaseContext(), productCategories, spuSelectedListener);
@@ -177,6 +159,7 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                     @Override
                     public void onClick(View v) {
                         showCategoryPop(pop);
+                        startCountingAd();
                     }
                 };
             }
@@ -193,7 +176,7 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == showSku) {
-            startDisplay();
+            reStartDisplay();
         }
         if (requestCode == showAd) {
             startCountingAd();
@@ -203,7 +186,6 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
 
     @Override
     protected void onDestroy() {
-        unbindService(connection);
         stop();
         super.onDestroy();
     }
@@ -214,7 +196,6 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
     }
 
     private Disposable mRoundSubscribe;
-
     private Disposable mAdSubscribe;
 
     private int speedPeriod = 100;
@@ -224,6 +205,9 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
 
     //开始轮播
     public void startDisplay() {
+        if (mRoundSubscribe!=null){
+            mRoundSubscribe.dispose();
+        }
         mRoundSubscribe = Observable.interval(startPeriod, speedPeriod, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
@@ -249,6 +233,9 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
 
     //重新轮播
     public void reStartDisplay() {
+        if (mRoundSubscribe!=null){
+            mRoundSubscribe.dispose();
+        }
         mRoundSubscribe = Observable.interval(replayPeriod, speedPeriod, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
