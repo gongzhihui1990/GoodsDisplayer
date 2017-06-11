@@ -83,8 +83,8 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
         setBackgroundDrawableFromSD(main_bg, ImageEnum.MAIN_BG);
         setBackgroundDrawableFromSD(imageTitleBar, ImageEnum.TITLE_BAR);
         setBackgroundDrawableFromSD(viewSelectAll, ImageEnum.HOME_BTN);
-        setBackgroundDrawableFromSD(viewSelectType, ImageEnum.HOME_BTN);
-//        setImageDrawableFromSD(imageTitleBar, ImageEnum.TITLE_BAR);
+        setBackgroundDrawableFromSD(viewSelectType, ImageEnum.SEARCH_BTN);
+        //setImageDrawableFromSD(imageTitleBar, ImageEnum.TITLE_BAR);
     }
 
     private final int showProduct = 10;

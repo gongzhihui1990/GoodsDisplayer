@@ -51,6 +51,8 @@ public class ShowDetailActivity extends BaseActivity {
     ImageView iv_pay_code;
     @BindView(R.id.good_price)
     TextView good_price;
+    @BindView(R.id.good_description)
+    TextView good_description;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,6 +86,8 @@ public class ShowDetailActivity extends BaseActivity {
         rightView.setVisibility(View.INVISIBLE);
         leftView.setVisibility(View.INVISIBLE);
         tvGoodName.setText(product.getTitle());
+        good_price.setText(product.getPrice());
+        good_description.setText(product.getTitle());
         Glide.with(this)
                 .load(product.getPicUrl())
                 .diskCacheStrategy(DiskCacheStrategy.ALL)

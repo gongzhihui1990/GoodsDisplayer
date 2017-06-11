@@ -297,7 +297,8 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ItemView
                     .error(R.mipmap.download_error)
                     .into(ivGood);
         TextView tvGood = (TextView) view.findViewById(R.id.good_name);
-        tvGood.setText(good.getTitle());
+        tvGood.setText("");
+//        tvGood.setText(good.getTitle());
     }
 
     @Override

@@ -3,7 +3,7 @@
     android:id="@+id/root_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black_overlay"
+    android:background="@color/bg_detial"
     tools:context="koolpos.cn.goodsdisplayer.ui.activity.ShowDetailActivity">
 
     <ImageView
@@ -54,11 +54,12 @@
                     android:layout_height="@dimen/gird_height" />
 
                 <TextView
+                    android:maxLength="10"
+                    android:maxLines="1"
                     android:id="@+id/good_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/dimens_60"
-                    android:text="这里显示商品名称"
                     android:textSize="@dimen/middle_text_size" />
 
                 <TextView
@@ -92,6 +93,7 @@
 
             <TextView
                 android:id="@+id/good_description"
+                android:maxEms="8"
                 android:layout_marginBottom="@dimen/dimens_300"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -100,8 +102,7 @@
                 android:layout_marginRight="@dimen/dimens_20"
                 android:layout_marginTop="@dimen/dimens_96"
                 android:gravity="center|right"
-                android:text="单穿打底都合适\n完美展现小雨点时空\n司机手机电视机"
-                android:textColor="@android:color/darker_gray"
+                android:textColor="@android:color/black"
                 android:textSize="@dimen/middle_text_size" />
             <!--  android:layout_width="@dimen/dimens_220"
               android:layout_height="@dimen/dimens_220"-->
