@@ -1,15 +1,39 @@
 package koolpos.cn.goodsdisplayer.ui.activity;
 
 import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.LayoutRes;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+
+import org.json.JSONObject;
 import org.reactivestreams.Subscription;
 
+import java.io.File;
+
 import butterknife.ButterKnife;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Function;
+import io.reactivex.functions.Predicate;
+import io.reactivex.schedulers.Schedulers;
+import koolpos.cn.goodsdisplayer.MyApplication;
+import koolpos.cn.goodsdisplayer.R;
+import koolpos.cn.goodsdisplayer.constans.ImageEnum;
+import koolpos.cn.goodsdisplayer.rxjava.ActivityObserver;
 import koolpos.cn.goodsdisplayer.util.Device;
+import koolpos.cn.goodsdisplayer.util.Loger;
 
 /**
  * Created by Administrator on 2017/5/13.
@@ -19,6 +43,116 @@ public class BaseActivity extends AppCompatActivity {
 
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
+    protected final void setImageDrawableFromSD(final ImageView view,final ImageEnum imageEnum){
+        Observable.just(MyApplication.PATHJson)
+                .filter(new Predicate<JSONObject>() {
+                    @Override
+                    public boolean test(@NonNull JSONObject pathJson) throws Exception {
+                        if (pathJson==null){
+                            return false;
+                        }
+                        String path =pathJson.optString(imageEnum.name());
+                        if (TextUtils.isEmpty(path)){
+                            return false;
+                        }
+                        return true;
+                    }
+                }).map(new Function<JSONObject, File>() {
+            @Override
+            public File apply(@NonNull JSONObject pathJson) throws Exception {
+                String path =pathJson.optString(imageEnum.name());
+                File file =new File(path);
+                Loger.d("load from path "+ path+"-"+file.length());
+                return file;
+            }
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new ActivityObserver<File>(BaseActivity.this) {
+                    @Override
+                    public void onNext(File file) {
+                        Glide.with(BaseActivity.this)
+                                .load(file)
+                                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                //.placeholder(R.mipmap.downloading)
+                                //.error(R.mipmap.download_error)
+                                .into(view);
+                    }
+                });
+    }
+    protected final void setBackgroundDrawableFromSD(final View view,final ImageEnum imageEnum){
+        Observable.just(MyApplication.PATHJson)
+                .filter(new Predicate<JSONObject>() {
+                    @Override
+                    public boolean test(@NonNull JSONObject pathJson) throws Exception {
+                        if (pathJson==null){
+                            return false;
+                        }
+                        String path =pathJson.optString(imageEnum.name());
+                        if (TextUtils.isEmpty(path)){
+                            return false;
+                        }
+                        return true;
+                    }
+                }).map(new Function<JSONObject, File>() {
+            @Override
+            public File apply(@NonNull JSONObject pathJson) throws Exception {
+                String path =pathJson.optString(imageEnum.name());
+                File file =new File(path);
+                Loger.d("load from path "+ path+"-"+file.length());
+                return file;
+            }
+        }).map(new Function<File, Drawable>() {
+            @Override
+            public Drawable apply(@NonNull File file) throws Exception {
+                Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+                Drawable drawable=new BitmapDrawable(bitmap);
+                return drawable;
+            }
+        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new ActivityObserver<Drawable>(BaseActivity.this) {
+                    @Override
+                    public void onNext(Drawable fileDrawable) {
+                        view.setBackgroundDrawable(fileDrawable);
+                    }
+                });
+    }
+//    protected final void setBackground(final View view, final ImageEnum imageEnum){
+//        Observable.just(MyApplication.PATHJson)
+//                .filter(new Predicate<JSONObject>() {
+//                    @Override
+//                    public boolean test(@NonNull JSONObject pathJson) throws Exception {
+//                        if (pathJson==null){
+//                            return false;
+//                        }
+//                        String path =pathJson.optString(imageEnum.name());
+//                        if (TextUtils.isEmpty(path)){
+//                            return false;
+//                        }
+//                        return true;
+//                    }
+//                }).map(new Function<JSONObject, File>() {
+//            @Override
+//            public File apply(@NonNull JSONObject pathJson) throws Exception {
+//                String path =pathJson.optString(imageEnum.name());
+//                File fileSrc =new File(path);
+//                return fileSrc;
+//            }
+//        }).subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(new ActivityObserver<File>(BaseActivity.this) {
+//                    @Override
+//                    public void onNext(File file) {
+//                        Glide.with(BaseActivity.this)
+//                                .load(file)
+//                                .diskCacheStrategy(DiskCacheStrategy.ALL)
+//                                //.placeholder(R.mipmap.downloading)
+//                                //.error(R.mipmap.download_error)
+//                                .into(view);
+//                    }
+//                });
+//    }
     @Override
     public void setContentView(@LayoutRes int layoutResID) {
         super.setContentView(layoutResID);

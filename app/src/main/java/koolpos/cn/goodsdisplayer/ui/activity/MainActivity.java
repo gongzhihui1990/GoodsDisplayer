@@ -9,8 +9,8 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.PopupWindow;
-import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
@@ -28,6 +28,7 @@ import io.reactivex.schedulers.Schedulers;
 import koolpos.cn.goodsdisplayer.MyApplication;
 import koolpos.cn.goodsdisplayer.R;
 import koolpos.cn.goodsdisplayer.api.AidlApi;
+import koolpos.cn.goodsdisplayer.constans.ImageEnum;
 import koolpos.cn.goodsdisplayer.mvcModel.Product;
 import koolpos.cn.goodsdisplayer.mvcModel.ProductCategory;
 import koolpos.cn.goodsdisplayer.rxjava.ActivityObserver;
@@ -46,8 +47,13 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
     @BindView(R.id.grid_content)
     RecyclerView gridContentView;
     @BindView(R.id.select_type)
-    TextView tvSelectType;
-
+    ImageView viewSelectType;
+    @BindView(R.id.select_all)
+    ImageView viewSelectAll;
+    @BindView(R.id.main_bg)
+    View main_bg;
+    @BindView(R.id.image_title_bar)
+    ImageView imageTitleBar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,9 +80,14 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                 return false;
             }
         });
+        setBackgroundDrawableFromSD(main_bg, ImageEnum.MAIN_BG);
+        setBackgroundDrawableFromSD(imageTitleBar, ImageEnum.TITLE_BAR);
+        setBackgroundDrawableFromSD(viewSelectAll, ImageEnum.HOME_BTN);
+        setBackgroundDrawableFromSD(viewSelectType, ImageEnum.HOME_BTN);
+//        setImageDrawableFromSD(imageTitleBar, ImageEnum.TITLE_BAR);
     }
 
-    private final int showSku = 10;
+    private final int showProduct = 10;
     private final int showAd = 11;
 
     private ProductAdapter productAdapter;
@@ -93,7 +104,7 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                     stop();
                     Intent intent = new Intent(getBaseContext(), ShowDetailActivity.class);
                     intent.putExtra(Product.class.getName(), product);
-                    startActivityForResult(intent, showSku);
+                    startActivityForResult(intent, showProduct);
                 }
             });
         }
@@ -168,14 +179,14 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                 .subscribe(new ActivityObserver<View.OnClickListener>(MainActivity.this) {
                     @Override
                     public void onNext(final View.OnClickListener onClickListener) {
-                        tvSelectType.setOnClickListener(onClickListener);
+                        viewSelectType.setOnClickListener(onClickListener);
                     }
                 });
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == showSku) {
+        if (requestCode == showProduct) {
             reStartDisplay();
         }
         if (requestCode == showAd) {
@@ -300,9 +311,10 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.addCategory(Intent.CATEGORY_HOME);
-        startActivity(intent);
+        super.onBackPressed();
+//        Intent intent = new Intent(Intent.ACTION_MAIN);
+//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//        intent.addCategory(Intent.CATEGORY_HOME);
+//        startActivity(intent);
     }
 }

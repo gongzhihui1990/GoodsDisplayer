@@ -48,6 +48,18 @@ public class AidlApi {
         }
         return ptList;
     }
+    public JSONObject getImageSrcPaths() throws Exception {
+        JSONObject request=new JSONObject();
+        request.put("action","local/getImageSrcPaths");
+        AidlResponse response =proxyPost(request.toString());
+        if (response.getCode()!=0){
+            throw new Exception(response.getMessage());
+        }
+        JSONObject pathSettings =new JSONObject(response.getData());
+        return pathSettings;
+    }
+    //local/getImageSrcPaths
+
     //
     public List<Goods> getTestListByType(String type) throws JSONException {
         JSONObject request=new JSONObject();

@@ -1,10 +1,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bgaa"
+    android:background="@color/black_overlay"
     tools:context="koolpos.cn.goodsdisplayer.ui.activity.ShowDetailActivity">
 
     <ImageView
@@ -12,79 +11,28 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <RelativeLayout
-        android:id="@+id/title"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/dimens_220"
-        android:layout_alignParentTop="true">
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="180dp"
-            android:layout_toLeftOf="@+id/point_left"
-            android:background="@drawable/shape_line_left" />
-
-        <ImageView
-            android:id="@+id/point_left"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="120dp"
-            android:layout_toLeftOf="@+id/tv_title"
-            android:src="@mipmap/point_title" />
-
-        <TextView
-            android:id="@+id/tv_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="@string/title_display_screen"
-            android:textColor="@color/title_head_color"
-            android:textSize="@dimen/title_head_text_size" />
-
-        <ImageView
-            android:id="@+id/point_right"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="120dp"
-            android:layout_toRightOf="@+id/tv_title"
-            android:src="@mipmap/point_title" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="180dp"
-            android:layout_toRightOf="@+id/point_right"
-            android:background="@drawable/shape_line_right" />
-    </RelativeLayout>
-
     <LinearLayout
+        android:layout_alignParentTop="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/title"
         android:orientation="horizontal">
 
         <FrameLayout
+            android:id="@+id/back_area_1"
             android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/dimens_144"
+            android:layout_weight="1">
 
             <TextView
-                android:id="@+id/back"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/dimens_32"
                 android:padding="@dimen/dimens_32"
                 android:text="返回"
-                android:textStyle="bold"
                 android:textColor="@android:color/holo_orange_dark"
-                android:textSize="@dimen/big_text_size" />
+                android:textSize="@dimen/big_text_size"
+                android:textStyle="bold" />
         </FrameLayout>
 
         <RelativeLayout
@@ -118,7 +66,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/dimens_48"
-                    android:text="￥1024.00"
                     android:textSize="@dimen/middle_text_size" />
             </LinearLayout>
 
@@ -183,6 +130,7 @@
                 android:background="@android:color/darker_gray" />
         </RelativeLayout>
         <View
+            android:id="@+id/back_area_2"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="match_parent">

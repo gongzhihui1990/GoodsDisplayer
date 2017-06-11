@@ -43,17 +43,26 @@ public class ShowDetailActivity extends BaseActivity {
     TextView tvGoodName;
     @BindView(R.id.iv_bg)
     ImageView ivBackGround;
-    @BindView(R.id.back)
-    View back;
+    @BindView(R.id.back_area_1)
+    View back_area_1;
+    @BindView(R.id.back_area_2)
+    View back_area_2;
     @BindView(R.id.iv_pay_code)
     ImageView iv_pay_code;
-
+    @BindView(R.id.good_price)
+    TextView good_price;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show_detail);
         Product product = (Product) getIntent().getSerializableExtra(Product.class.getName());
-        back.setOnClickListener(new View.OnClickListener() {
+        back_area_1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+        back_area_2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onBackPressed();
@@ -124,7 +133,7 @@ public class ShowDetailActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         if (true){
-            onBackPressed();
+            super.onBackPressed();
             return;
         }
         Animation animatorLeft = AnimationUtils.loadAnimation(getBaseContext(), R.anim.show_enter_left_anim);

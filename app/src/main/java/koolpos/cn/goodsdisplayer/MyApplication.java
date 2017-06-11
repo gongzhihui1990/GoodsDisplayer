@@ -8,6 +8,8 @@ import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.os.IBinder;
 
+import org.json.JSONObject;
+
 import koolpos.cn.goodproviderservice.service.aidl.IGPService;
 import koolpos.cn.goodsdisplayer.api.AidlApi;
 import koolpos.cn.goodsdisplayer.util.AndroidUtils;
@@ -26,6 +28,7 @@ public class MyApplication extends Application{
     }
     public static AidlApi AIDLApi;
 
+    public static JSONObject PATHJson;
     private ServiceConnection connection = new ServiceConnection() {
 
         @Override

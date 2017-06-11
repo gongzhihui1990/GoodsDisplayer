@@ -11,13 +11,18 @@ import android.support.design.widget.Snackbar;
 import android.view.View;
 import android.widget.TextView;
 
+import org.json.JSONObject;
+
 import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
+import koolpos.cn.goodsdisplayer.MyApplication;
 import koolpos.cn.goodsdisplayer.R;
+import koolpos.cn.goodsdisplayer.api.AidlApi;
 import koolpos.cn.goodsdisplayer.rxjava.ActivityObserver;
 import koolpos.cn.goodsdisplayer.util.Loger;
 
@@ -39,12 +44,19 @@ public class SplashActivity extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-        Observable.timer(1, TimeUnit.SECONDS)
+        Observable.timer(2, TimeUnit.SECONDS)
+                .map(new Function<Long, JSONObject>() {
+                    @Override
+                    public JSONObject apply(@io.reactivex.annotations.NonNull Long aLong) throws Exception {
+                        return MyApplication.AIDLApi.getImageSrcPaths();
+                    }
+                })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new ActivityObserver<Long>(this) {
+                .subscribe(new ActivityObserver<JSONObject>(this) {
                     @Override
-                    public void onNext(Long aLong) {
+                    public void onNext(JSONObject pathJson) {
+                        MyApplication.PATHJson=pathJson;
                         populateAutoComplete();
                     }
                 });
