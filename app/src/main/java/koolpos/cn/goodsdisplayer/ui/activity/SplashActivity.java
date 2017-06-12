@@ -18,11 +18,14 @@ import java.util.concurrent.TimeUnit;
 import butterknife.BindView;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.BiFunction;
+import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import koolpos.cn.goodsdisplayer.MyApplication;
 import koolpos.cn.goodsdisplayer.R;
 import koolpos.cn.goodsdisplayer.api.AidlApi;
+import koolpos.cn.goodsdisplayer.mvcModel.AIDLSetting;
 import koolpos.cn.goodsdisplayer.rxjava.ActivityObserver;
 import koolpos.cn.goodsdisplayer.util.Loger;
 
@@ -44,20 +47,51 @@ public class SplashActivity extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-        Observable.timer(2, TimeUnit.SECONDS)
-                .map(new Function<Long, JSONObject>() {
-                    @Override
-                    public JSONObject apply(@io.reactivex.annotations.NonNull Long aLong) throws Exception {
-                        return MyApplication.AIDLApi.getImageSrcPaths();
-                    }
-                })
+        Observable.timer(5, TimeUnit.SECONDS)
+                .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new ActivityObserver<JSONObject>(this) {
+                .subscribe(new Consumer<Long>() {
                     @Override
-                    public void onNext(JSONObject pathJson) {
-                        MyApplication.PATHJson=pathJson;
-                        populateAutoComplete();
+                    public void accept(@io.reactivex.annotations.NonNull Long aLong) throws Exception {
+                       Observable<Boolean> ob1= Observable.just( MyApplication.AIDLApi)
+                                .map(new Function<AidlApi, JSONObject>() {
+                                    @Override
+                                    public JSONObject apply(@io.reactivex.annotations.NonNull AidlApi aidlApi) throws Exception {
+                                        return aidlApi.getImageSrcPaths();
+                                    }
+                                }).map(new Function<JSONObject, Boolean>() {
+                            @Override
+                            public Boolean apply(@io.reactivex.annotations.NonNull JSONObject pathJson) throws Exception {
+                                MyApplication.PATHJson=pathJson;
+                                return true;
+                            }
+                        });
+                       Observable<Boolean> ob2= Observable.just( MyApplication.AIDLApi)
+                                .map(new Function<AidlApi, AIDLSetting>() {
+                                    @Override
+                                    public AIDLSetting apply(@io.reactivex.annotations.NonNull AidlApi aidlApi) throws Exception {
+                                        return aidlApi.getAIDLSetting();
+                                    }
+                                }).map(new Function<AIDLSetting, Boolean>() {
+                            @Override
+                            public Boolean apply(@io.reactivex.annotations.NonNull AIDLSetting setting) throws Exception {
+                                MyApplication.AIDLSettting=setting;
+                                return true;
+                            }
+                        });
+                      Observable.zip(ob1, ob2, new BiFunction<Boolean, Boolean, Boolean>() {
+                          @Override
+                          public Boolean apply(@io.reactivex.annotations.NonNull Boolean aBoolean, @io.reactivex.annotations.NonNull Boolean aBoolean2) throws Exception {
+                              return true;
+                          }
+                      }).subscribeOn(Schedulers.io())
+                              .observeOn(AndroidSchedulers.mainThread())
+                              .subscribe(new ActivityObserver<Boolean>(SplashActivity.this) {
+                                  @Override
+                                  public void onNext(Boolean pathJson) {
+                                      populateAutoComplete();
+                                  }
+                              });
                     }
                 });
     }

@@ -14,6 +14,7 @@ import android.widget.PopupWindow;
 
 import com.bumptech.glide.Glide;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -24,11 +25,13 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
+import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 import koolpos.cn.goodsdisplayer.MyApplication;
 import koolpos.cn.goodsdisplayer.R;
 import koolpos.cn.goodsdisplayer.api.AidlApi;
 import koolpos.cn.goodsdisplayer.constans.ImageEnum;
+import koolpos.cn.goodsdisplayer.mvcModel.AdBean;
 import koolpos.cn.goodsdisplayer.mvcModel.Product;
 import koolpos.cn.goodsdisplayer.mvcModel.ProductCategory;
 import koolpos.cn.goodsdisplayer.rxjava.ActivityObserver;
@@ -61,6 +64,7 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
         Glide.with(MyApplication.getContext()).resumeRequests();
         gridContentView.setLayoutManager(new LinearLayoutManager(getBaseContext(), LinearLayoutManager.HORIZONTAL, false));
         initUI(MyApplication.AIDLApi);
+        initAd();
         startDisplay();
         startCountingAd();
         gridContentView.setOnTouchListener(new View.OnTouchListener() {
@@ -85,6 +89,29 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
         setBackgroundDrawableFromSD(viewSelectAll, ImageEnum.HOME_BTN);
         setBackgroundDrawableFromSD(viewSelectType, ImageEnum.SEARCH_BTN);
         //setImageDrawableFromSD(imageTitleBar, ImageEnum.TITLE_BAR);
+    }
+    private List<AdBean> adBeanList =new ArrayList<>();
+    private void initAd() {
+
+        Observable.just( MyApplication.AIDLApi)
+                .map(new Function<AidlApi, List<AdBean>>() {
+                    @Override
+                    public List<AdBean> apply(@NonNull AidlApi aidlApi) throws Exception {
+                        return aidlApi.getAdList();
+                    }
+                }).filter(new Predicate<List<AdBean>>() {
+            @Override
+            public boolean test(@NonNull List<AdBean> adBeen) throws Exception {
+                return adBeen!=null&&adBeen.size()>0;
+            }
+        }).observeOn(Schedulers.io())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new ActivityObserver<List<AdBean>>(MainActivity.this) {
+                    @Override
+                    public void onNext(List<AdBean> adBeans) {
+                        adBeanList.addAll(adBeans);
+                    }
+                });
     }
 
     private final int showProduct = 10;
@@ -289,8 +316,9 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
         }
     }
 
-    private int adWaitingPeriod = 30;
+    private int adWaitingPeriod = MyApplication.AIDLSettting.getIntervalAd();
 
+    private int adIndex =0;
     //adWaitingPeriod d秒后 播放广播
     private void startCountingAd() {
         if (mAdSubscribe != null) {
@@ -302,8 +330,17 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                 .subscribe(new Consumer<Long>() {
                     @Override
                     public void accept(@NonNull Long aLong) throws Exception {
-                        Intent intent = new Intent(getBaseContext(), AdVideoDisplayActivity.class);
-                        startActivityForResult(intent, showAd);
+                        adIndex++;
+                        if (adBeanList!=null&&adBeanList.size()!=0){
+                            int size =adBeanList.size();
+                            int pos=  adIndex%size;
+                            Loger.d("play- "+pos+"/"+size+" : "+adBeanList.get(pos).toString());
+                            //TODO 展示图片广告
+                            Intent intent = new Intent(getBaseContext(), AdVideoDisplayActivity.class);
+                            startActivityForResult(intent, showAd);
+                        }else {
+                            Loger.d("play- null");
+                        }
                         mAdSubscribe.dispose();
                     }
                 });

@@ -1,13 +1,17 @@
 package koolpos.cn.goodsdisplayer.ui.activity;
 
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.support.annotation.LayoutRes;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -18,6 +22,7 @@ import org.json.JSONObject;
 import org.reactivestreams.Subscription;
 
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.ButterKnife;
 import io.reactivex.Observable;
@@ -25,6 +30,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
@@ -42,8 +48,48 @@ import koolpos.cn.goodsdisplayer.util.Loger;
 public class BaseActivity extends AppCompatActivity {
 
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
+    private Disposable bugSubscribe;
 
-    protected final void setImageDrawableFromSD(final ImageView view,final ImageEnum imageEnum){
+
+
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        startBug();
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    private void startBug(){
+        bugSubscribe = Observable.interval(1, 10, TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Consumer<Long>() {
+                    @Override
+                    public void accept(@NonNull Long aLong) throws Exception {
+                        findViewById(android.R.id.content).setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|
+                                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+                    }
+                });
+    }
+    private void stopBug(){
+        bugSubscribe.dispose();
+    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stopBug();
+    }
+
+    protected final void setImageDrawableFromSD(final ImageView view, final ImageEnum imageEnum){
         Observable.just(MyApplication.PATHJson)
                 .filter(new Predicate<JSONObject>() {
                     @Override

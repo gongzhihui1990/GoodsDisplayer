@@ -12,8 +12,8 @@ import org.json.JSONObject;
 
 import koolpos.cn.goodproviderservice.service.aidl.IGPService;
 import koolpos.cn.goodsdisplayer.api.AidlApi;
+import koolpos.cn.goodsdisplayer.mvcModel.AIDLSetting;
 import koolpos.cn.goodsdisplayer.util.AndroidUtils;
-import koolpos.cn.goodsdisplayer.util.Loger;
 
 /**
  * Created by Administrator on 2017/5/13.
@@ -27,6 +27,7 @@ public class MyApplication extends Application{
       return instance.getBaseContext();
     }
     public static AidlApi AIDLApi;
+    public static AIDLSetting AIDLSettting;
 
     public static JSONObject PATHJson;
     private ServiceConnection connection = new ServiceConnection() {
