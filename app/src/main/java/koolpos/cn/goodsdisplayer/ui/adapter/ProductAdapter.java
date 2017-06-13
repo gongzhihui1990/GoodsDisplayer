@@ -29,6 +29,7 @@ import koolpos.cn.goodsdisplayer.mvcModel.Product;
 import koolpos.cn.goodsdisplayer.mvcModel.ProductCategory;
 import koolpos.cn.goodsdisplayer.rxjava.ActivityObserver;
 import koolpos.cn.goodsdisplayer.ui.activity.BaseActivity;
+import koolpos.cn.goodsdisplayer.util.AndroidUtils;
 import koolpos.cn.goodsdisplayer.util.Loger;
 
 /**
@@ -281,21 +282,21 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ItemView
         switch (idRoot) {
             case R.id.item_a_big:
             case R.id.item_b_big:
-                ivGood.setPadding(40, 40, 40, 40);
+                ivGood.setPadding(3, 3, 3, 3);
                 break;
             default:
-                ivGood.setPadding(20, 20, 20, 20);
+                ivGood.setPadding(3, 3, 3, 3);
                 break;
         }
-            Glide.with(view.getContext())
-                    .load(good.getPicUrl())
-                    //               .load(itemGood.getImage_url())
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .placeholder(R.mipmap.downloading)
-                    .animate(R.anim.zoom_in)
-                    .fitCenter()
-                    .error(R.mipmap.download_error)
-                    .into(ivGood);
+        AndroidUtils.loadImageAnim(good.getPicUrl(),ivGood);
+//            Glide.with(view.getContext())
+//                    .load(good.getPicUrl())
+//                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+//                    .placeholder(R.mipmap.downloading)
+//                    .animate(R.anim.zoom_in)
+//                    .fitCenter()
+//                    .error(R.mipmap.download_error)
+//                    .into(ivGood);
         TextView tvGood = (TextView) view.findViewById(R.id.good_name);
         tvGood.setText("");
 //        tvGood.setText(good.getTitle());

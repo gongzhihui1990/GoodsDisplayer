@@ -47,11 +47,9 @@ import koolpos.cn.goodsdisplayer.util.Loger;
 
 public class BaseActivity extends AppCompatActivity {
 
+
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
-    private Disposable bugSubscribe;
-
-
-
+//    private Disposable bugSubscribe;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -69,19 +67,19 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     private void startBug(){
-        bugSubscribe = Observable.interval(1, 10, TimeUnit.SECONDS)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(new Consumer<Long>() {
-                    @Override
-                    public void accept(@NonNull Long aLong) throws Exception {
-                        findViewById(android.R.id.content).setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|
-                                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-                    }
-                });
+//        bugSubscribe = Observable.interval(1, 10, TimeUnit.SECONDS)
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribeOn(Schedulers.io())
+//                .subscribe(new Consumer<Long>() {
+//                    @Override
+//                    public void accept(@NonNull Long aLong) throws Exception {
+//                        findViewById(android.R.id.content).setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|
+//                                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+//                    }
+//                });
     }
     private void stopBug(){
-        bugSubscribe.dispose();
+//        bugSubscribe.dispose();
     }
     @Override
     protected void onDestroy() {
@@ -119,6 +117,7 @@ public class BaseActivity extends AppCompatActivity {
                         Glide.with(BaseActivity.this)
                                 .load(file)
                                 .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                .fitCenter()
                                 //.placeholder(R.mipmap.downloading)
                                 //.error(R.mipmap.download_error)
                                 .into(view);

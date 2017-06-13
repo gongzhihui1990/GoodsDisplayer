@@ -1,5 +1,7 @@
 package koolpos.cn.goodsdisplayer.mvcModel;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 
 
@@ -190,4 +192,8 @@ public class AdBean  implements Serializable{
         this.transition = transition;
     }
 
+    @Override
+    public String toString() {
+        return  new Gson().toJson(this);
+    }
 }

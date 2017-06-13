@@ -47,6 +47,10 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/FullscreenTheme"/>
 
+        <activity android:name=".ui.activity.AdImageDisplayActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@style/FullscreenTheme"/>
+
         <meta-data android:name="koolpos.cn.goodsdisplayer.glide.GlideConfiguration" android:value="GlideModule"/>
     </application>
 

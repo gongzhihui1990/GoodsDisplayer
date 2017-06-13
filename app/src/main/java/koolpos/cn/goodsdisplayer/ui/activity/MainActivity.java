@@ -57,6 +57,7 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
     View main_bg;
     @BindView(R.id.image_title_bar)
     ImageView imageTitleBar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,16 +85,18 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                 return false;
             }
         });
+        setImageDrawableFromSD(imageTitleBar, ImageEnum.TITLE_BAR);
         setBackgroundDrawableFromSD(main_bg, ImageEnum.MAIN_BG);
-        setBackgroundDrawableFromSD(imageTitleBar, ImageEnum.TITLE_BAR);
+//        setBackgroundDrawableFromSD(imageTitleBar, ImageEnum.TITLE_BAR);
         setBackgroundDrawableFromSD(viewSelectAll, ImageEnum.HOME_BTN);
         setBackgroundDrawableFromSD(viewSelectType, ImageEnum.SEARCH_BTN);
-        //setImageDrawableFromSD(imageTitleBar, ImageEnum.TITLE_BAR);
     }
-    private List<AdBean> adBeanList =new ArrayList<>();
+
+    private List<AdBean> adBeanList = new ArrayList<>();
+
     private void initAd() {
 
-        Observable.just( MyApplication.AIDLApi)
+        Observable.just(MyApplication.AIDLApi)
                 .map(new Function<AidlApi, List<AdBean>>() {
                     @Override
                     public List<AdBean> apply(@NonNull AidlApi aidlApi) throws Exception {
@@ -102,7 +105,7 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                 }).filter(new Predicate<List<AdBean>>() {
             @Override
             public boolean test(@NonNull List<AdBean> adBeen) throws Exception {
-                return adBeen!=null&&adBeen.size()>0;
+                return adBeen != null && adBeen.size() > 0;
             }
         }).observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.io())
@@ -132,6 +135,11 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                     Intent intent = new Intent(getBaseContext(), ShowDetailActivity.class);
                     intent.putExtra(Product.class.getName(), product);
                     startActivityForResult(intent, showProduct);
+//                    Bitmap cacheBmp = Bitmap.createBitmap(getWindow().getDecorView().getWidth(), getWindow().getDecorView().getHeight(), Bitmap.Config.ARGB_8888);
+//                    Canvas canvas = new Canvas(cacheBmp);
+//                    getWindow().getDecorView().draw(canvas);
+//                    MyApplication.CacheBitmap=cacheBmp;
+//                    Observable.just()
                 }
             });
         }
@@ -243,7 +251,7 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
 
     //开始轮播
     public void startDisplay() {
-        if (mRoundSubscribe!=null){
+        if (mRoundSubscribe != null) {
             mRoundSubscribe.dispose();
         }
         mRoundSubscribe = Observable.interval(startPeriod, speedPeriod, TimeUnit.MILLISECONDS)
@@ -271,7 +279,7 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
 
     //重新轮播
     public void reStartDisplay() {
-        if (mRoundSubscribe!=null){
+        if (mRoundSubscribe != null) {
             mRoundSubscribe.dispose();
         }
         mRoundSubscribe = Observable.interval(replayPeriod, speedPeriod, TimeUnit.MILLISECONDS)
@@ -318,7 +326,8 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
 
     private int adWaitingPeriod = MyApplication.AIDLSettting.getIntervalAd();
 
-    private int adIndex =0;
+    private int adIndex = 0;
+
     //adWaitingPeriod d秒后 播放广播
     private void startCountingAd() {
         if (mAdSubscribe != null) {
@@ -331,14 +340,25 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                     @Override
                     public void accept(@NonNull Long aLong) throws Exception {
                         adIndex++;
-                        if (adBeanList!=null&&adBeanList.size()!=0){
-                            int size =adBeanList.size();
-                            int pos=  adIndex%size;
-                            Loger.d("play- "+pos+"/"+size+" : "+adBeanList.get(pos).toString());
+                        if (adBeanList != null && adBeanList.size() != 0) {
+                            int size = adBeanList.size();
+                            int pos = adIndex % size;
+                            AdBean adBean = adBeanList.get(pos);
+                            if (adBean.getResourType() != null) {
+                                switch (adBean.getResourType()) {
+                                    case "Image":
+                                        Intent intent = new Intent(getBaseContext(), AdImageDisplayActivity.class);
+                                        intent.putExtra(AdBean.class.getName(),adBean);
+                                        startActivityForResult(intent, showAd);
+                                        break;
+                                }
+                            }
+
+//                            Loger.d("play- "+pos+"/"+size+" : "+.toString());
                             //TODO 展示图片广告
-                            Intent intent = new Intent(getBaseContext(), AdVideoDisplayActivity.class);
-                            startActivityForResult(intent, showAd);
-                        }else {
+//                            Intent intent = new Intent(getBaseContext(), AdVideoDisplayActivity.class);
+//                            startActivityForResult(intent, showAd);
+                        } else {
                             Loger.d("play- null");
                         }
                         mAdSubscribe.dispose();

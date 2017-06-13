@@ -9,12 +9,40 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.provider.Settings;
+import android.widget.ImageView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.util.List;
 
 import koolpos.cn.goodsdisplayer.MyApplication;
+import koolpos.cn.goodsdisplayer.R;
 
 public class AndroidUtils {
+
+	public static void loadImageAnim(String url,ImageView imageView){
+		if (url.startsWith("http")||url.startsWith("/")){
+			Glide.with(imageView.getContext())
+					.load(url)
+					.diskCacheStrategy(DiskCacheStrategy.ALL)
+					.placeholder(R.mipmap.downloading)
+					.animate(R.anim.zoom_in)
+					.fitCenter()
+					.error(R.mipmap.download_error)
+					.into(imageView);
+		}else {
+			Loger.i("from warp "+"http://store.troncell.com/"+url);
+			Glide.with(imageView.getContext())
+					.load("http://store.troncell.com/"+url)
+					.diskCacheStrategy(DiskCacheStrategy.ALL)
+					.placeholder(R.mipmap.downloading)
+					.animate(R.anim.zoom_in)
+					.fitCenter()
+					.error(R.mipmap.download_error)
+					.into(imageView);
+		}
+	}
 	public static Intent getExplicitIntent(Context context, Intent implicitIntent) {
         // Retrieve all services that can match the given intent
         PackageManager pm = context.getPackageManager();

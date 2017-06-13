@@ -2,6 +2,7 @@ package koolpos.cn.goodsdisplayer.util;
 
 import android.graphics.Bitmap;
 import android.util.DisplayMetrics;
+import android.widget.ImageView;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
@@ -22,7 +23,7 @@ public class CodeBitmap {
 		//生成二维矩阵,编码时指定大小,不要生成了图片以后再进行缩放,这样会模糊导致识别失败
 		BitMatrix matrix = null;
 		try {
-			matrix = new MultiFormatWriter().encode(str, BarcodeFormat.QR_CODE, 220, 220);
+			matrix = new MultiFormatWriter().encode(str, BarcodeFormat.QR_CODE,220,220);
 		} catch (WriterException e) {
 			e.printStackTrace();
 		}

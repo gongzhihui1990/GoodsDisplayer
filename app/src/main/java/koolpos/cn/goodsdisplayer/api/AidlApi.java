@@ -126,6 +126,7 @@ public class AidlApi {
     }
 
     private AidlResponse proxyPost(String request) {
+        Loger.d("AidlRequset:" + request);
         String response = "";
         try {
             response = service.proxyPost(request);

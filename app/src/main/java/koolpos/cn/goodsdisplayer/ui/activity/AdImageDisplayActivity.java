@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.VideoView;
 
@@ -19,42 +20,43 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
+import koolpos.cn.goodsdisplayer.MyApplication;
 import koolpos.cn.goodsdisplayer.R;
+import koolpos.cn.goodsdisplayer.mvcModel.AdBean;
+import koolpos.cn.goodsdisplayer.util.AndroidUtils;
 import koolpos.cn.goodsdisplayer.util.Loger;
+
+import static koolpos.cn.goodsdisplayer.R.id.videoView;
 
 /**
  * Created by Administrator on 2017/6/3.
  */
 
 public class AdImageDisplayActivity extends BaseActivity {
-    @BindView(R.id.videoView)
-    VideoView videoView;
+    @BindView(R.id.imageView)
+    ImageView imageView;
     @BindView(R.id.tvTimeRemain)
     TextView tvTimeRemain;
+    @BindView(R.id.root_view)
+    View root_view;
     private Disposable sub;
 
+
+    int timeMs = 0;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_adv_play);
-        String uri = "android.resource://" + getPackageName() + "/" + R.raw.ad1;
-        videoView.setVideoURI(Uri.parse((uri)));
-        //videoView.setMediaController(new MediaController(LoginLogoActivity.this));  ／／添加控制台
-        videoView.requestFocus();
-        videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mediaPlayer) {
-                finish();
-            }
-        });
-        videoView.start();
+        setContentView(R.layout.activity_ad_image_play);
+
+        final AdBean adBean = (AdBean) getIntent().getSerializableExtra(AdBean.class.getName());
+        AndroidUtils.loadImageAnim(adBean.getFileurl(),imageView);
         sub = Observable.interval(0, 1, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .map(new Function<Long, Integer>() {
                     @Override
                     public Integer apply(@NonNull Long aLong) throws Exception {
-                        int ms = videoView.getDuration();
+                        int ms = MyApplication.AIDLSettting.getPlayLongAd()*1000;
                         return ms;
                     }
                 }).filter(new Predicate<Integer>() {
@@ -68,7 +70,7 @@ public class AdImageDisplayActivity extends BaseActivity {
                 }).map(new Function<Integer, Integer>() {
                     @Override
                     public Integer apply(@NonNull Integer duration) throws Exception {
-                        int timeMs = videoView.getCurrentPosition();
+                        timeMs += 1000;
                         int totalSeconds = duration / 1000;
                         int curSeconds = timeMs / 1000;
                         int remainSeconds = totalSeconds - curSeconds;
@@ -87,6 +89,15 @@ public class AdImageDisplayActivity extends BaseActivity {
                     public void accept(@NonNull Integer remainSeconds) throws Exception {
                         Loger.e("remainSeconds:" + remainSeconds);
                         tvTimeRemain.setText("广告剩余：" + remainSeconds + "秒（点击关闭）");
+                        if (remainSeconds==0){
+                            finish();
+                        }
+                        root_view.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                finish();
+                            }
+                        });
                         tvTimeRemain.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {

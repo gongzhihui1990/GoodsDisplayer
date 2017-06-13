@@ -31,6 +31,8 @@ public class AdVideoDisplayActivity extends BaseActivity {
     VideoView videoView;
     @BindView(R.id.tvTimeRemain)
     TextView tvTimeRemain;
+    @BindView(R.id.root_view)
+    View root_view;
     private Disposable sub;
 
     @Override

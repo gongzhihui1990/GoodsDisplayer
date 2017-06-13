@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.Priority;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.util.concurrent.TimeUnit;
@@ -24,6 +25,7 @@ import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import koolpos.cn.goodsdisplayer.R;
 import koolpos.cn.goodsdisplayer.mvcModel.Product;
+import koolpos.cn.goodsdisplayer.util.AndroidUtils;
 import koolpos.cn.goodsdisplayer.util.CodeBitmap;
 
 /**
@@ -88,13 +90,15 @@ public class ShowDetailActivity extends BaseActivity {
         tvGoodName.setText(product.getTitle());
         good_price.setText(product.getPrice());
         good_description.setText(product.getTitle());
-        Glide.with(this)
-                .load(product.getPicUrl())
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .placeholder(R.mipmap.downloading)
-                .animate(R.anim.zoom_in)
-                .error(R.mipmap.download_error)
-                .into(ivGoodImage);
+//        Glide.with(this)
+//                .load(product.getPicUrl())
+//                .diskCacheStrategy(DiskCacheStrategy.ALL)
+//                .placeholder(R.mipmap.downloading)
+//                .animate(R.anim.zoom_in)
+//                .fitCenter()
+//                .error(R.mipmap.download_error)
+//                .into(ivGoodImage);
+        AndroidUtils.loadImageAnim(product.getPicUrl(),ivGoodImage);
         Animation animatorLeft = AnimationUtils.loadAnimation(getBaseContext(), R.anim.show_enter_left_anim);
         animatorLeft.setAnimationListener(new Animation.AnimationListener() {
             @Override
