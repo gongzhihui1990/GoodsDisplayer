@@ -51,12 +51,11 @@ public class BaseActivity extends AppCompatActivity {
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
     private Disposable bugSubscribe;
 
-    private boolean fullSet;
+    private boolean fullSet = true;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         startBug();
-
     }
     @Override
     protected void onResume() {
@@ -72,7 +71,7 @@ public class BaseActivity extends AppCompatActivity {
         if (!fullSet){
             return;
         }
-        bugSubscribe = Observable.interval(1, 10, TimeUnit.SECONDS)
+        bugSubscribe = Observable.interval(1, 3, TimeUnit.SECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(new Consumer<Long>() {

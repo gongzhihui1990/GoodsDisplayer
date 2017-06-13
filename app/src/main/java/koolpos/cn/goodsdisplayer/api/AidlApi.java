@@ -24,8 +24,13 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.Observable;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.functions.Function;
+import io.reactivex.functions.Predicate;
 import koolpos.cn.goodproviderservice.service.aidl.IGPService;
 import koolpos.cn.goodsdisplayer.MyApplication;
+import koolpos.cn.goodsdisplayer.constans.ImageEnum;
 import koolpos.cn.goodsdisplayer.mvcModel.AIDLSetting;
 import koolpos.cn.goodsdisplayer.mvcModel.AdBean;
 import koolpos.cn.goodsdisplayer.mvcModel.AidlResponse;
@@ -124,7 +129,18 @@ public class AidlApi {
         List<ProductCategory> categories = new Gson().fromJson(response.getData(),
                 new TypeToken<List<ProductCategory>>() {
                 }.getType());
-        return categories;
+        List<ProductCategory> warpedCategories =new ArrayList<>();
+        if (categories!=null&&categories.size()!=0){
+            //添加‘全部’分类
+            String path =MyApplication.PATHJson.optString(ImageEnum.SEARCH_BTN.name());
+            ProductCategory categoryAll=new ProductCategory();
+            categoryAll.setCategoryId(-1);
+            categoryAll.setName("全部");
+            categoryAll.setIconUrl(path);
+            warpedCategories.add(categoryAll);
+            warpedCategories.addAll(categories);
+        }
+        return warpedCategories;
     }
 
     public List<Product> getProductList(ProductCategory category) throws JSONException, RemoteException {

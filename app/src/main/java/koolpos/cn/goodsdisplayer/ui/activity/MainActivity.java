@@ -90,7 +90,6 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
         });
         setImageDrawableFromSD(imageTitleBar, ImageEnum.TITLE_BAR);
         setBackgroundDrawableFromSD(main_bg, ImageEnum.MAIN_BG);
-//        setBackgroundDrawableFromSD(imageTitleBar, ImageEnum.TITLE_BAR);
         setBackgroundDrawableFromSD(viewSelectAll, ImageEnum.HOME_BTN);
         setBackgroundDrawableFromSD(viewSelectType, ImageEnum.SEARCH_BTN);
     }
@@ -203,7 +202,7 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
         }
         productAdapter.setCategory(categorySelect);
     }
-
+    private CategoryPop categoryPop;
     private void initUI(final AidlApi aidlApi) {
         Observable.just(aidlApi)
                 .map(new Function<AidlApi, List<ProductCategory>>() {
@@ -230,7 +229,8 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                                 startCountingAd();
                             }
                         });
-                return new CategoryPop(getBaseContext(), productCategories, spuSelectedListener);
+                categoryPop =new CategoryPop(getBaseContext(), productCategories, spuSelectedListener);
+                return categoryPop;
             }
         }).map(new Function<CategoryPop, View.OnClickListener>() {
             @Override
@@ -274,9 +274,7 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                             @Override
                             public void onClick(View v) {
                                 //设置为全部
-                                ProductCategory all=new ProductCategory();
-                                all.setCategoryId(-1);
-                                setGridAdapter(aidlApi,all);
+                                categoryPop.selectAll();
                             }
                         });
                     }
@@ -388,7 +386,7 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
         }
     }
 
-    private int adWaitingPeriod = MyApplication.AIDLSettting.getIntervalAd();
+    private int adWaitingPeriod = MyApplication.AIDLSet.getIntervalAd();
 
     private int adIndex = 0;
 

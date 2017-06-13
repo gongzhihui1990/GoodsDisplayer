@@ -9,6 +9,7 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
+import android.graphics.drawable.AnimationDrawable;
 import android.media.Image;
 import android.provider.Settings;
 import android.widget.ImageView;
@@ -34,6 +35,7 @@ public class AndroidUtils {
 	public static void loadImage(String url,ImageView imageView,boolean withAnim){
 		DrawableRequestBuilder<String> request;
 		if (url.startsWith("http")||url.startsWith("/")){
+			Loger.i("from url "+ url);
 			request=Glide.with(imageView.getContext())
 					.load(url);
 		}else {
@@ -44,8 +46,25 @@ public class AndroidUtils {
 		if (withAnim){
 			request = request.animate(R.anim.zoom_in);
 		}
+		final ObjectAnimator anim = ObjectAnimator.ofInt(imageView, "ImageLevel", 0, 10000);
+		anim.setDuration(500);
+		anim.setRepeatCount(ObjectAnimator.RESTART);
+		anim.start();
 		request.diskCacheStrategy(DiskCacheStrategy.ALL)
 				.skipMemoryCache(false)
+                .listener(new RequestListener<String, GlideDrawable>() {
+                    @Override
+                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+						anim.cancel();
+						return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+						anim.cancel();
+                        return false;
+                    }
+                })
 				.placeholder(R.drawable.rotate_loading)
 				.error(R.mipmap.download_error)
 				.fitCenter()

@@ -1,13 +1,10 @@
 package koolpos.cn.goodsdisplayer.ui.activity;
 
-import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.VideoView;
 
 import java.util.concurrent.TimeUnit;
 
@@ -25,8 +22,6 @@ import koolpos.cn.goodsdisplayer.R;
 import koolpos.cn.goodsdisplayer.mvcModel.AdBean;
 import koolpos.cn.goodsdisplayer.util.AndroidUtils;
 import koolpos.cn.goodsdisplayer.util.Loger;
-
-import static koolpos.cn.goodsdisplayer.R.id.videoView;
 
 /**
  * Created by Administrator on 2017/6/3.
@@ -56,7 +51,7 @@ public class AdImageDisplayActivity extends BaseActivity {
                 .map(new Function<Long, Integer>() {
                     @Override
                     public Integer apply(@NonNull Long aLong) throws Exception {
-                        int ms = MyApplication.AIDLSettting.getPlayLongAd()*1000;
+                        int ms = MyApplication.AIDLSet.getPlayLongAd()*1000;
                         return ms;
                     }
                 }).filter(new Predicate<Integer>() {

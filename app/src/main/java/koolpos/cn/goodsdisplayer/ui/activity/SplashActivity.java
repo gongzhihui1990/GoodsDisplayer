@@ -1,7 +1,10 @@
 package koolpos.cn.goodsdisplayer.ui.activity;
 
 import android.annotation.TargetApi;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -10,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONObject;
 
@@ -43,57 +47,108 @@ public class SplashActivity extends BaseActivity {
     @BindView(R.id.tv_hint_common)
     TextView tv_hint_common;
 
+    private boolean initFlag=false;
+    BroadcastReceiver receiver =new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if ("service.state.ok".equals(intent.getAction())){
+                initDataFromAIDL();
+            }
+        }
+    };
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        registerReceiver(receiver,new IntentFilter("service.state.ok"));
         setContentView(R.layout.activity_splash);
+        MyApplication.getInstance().initApp();
         Observable.timer(5, TimeUnit.SECONDS)
                 .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.io())
                 .subscribe(new Consumer<Long>() {
                     @Override
                     public void accept(@io.reactivex.annotations.NonNull Long aLong) throws Exception {
-                       Observable<Boolean> ob1= Observable.just( MyApplication.AIDLApi)
-                                .map(new Function<AidlApi, JSONObject>() {
-                                    @Override
-                                    public JSONObject apply(@io.reactivex.annotations.NonNull AidlApi aidlApi) throws Exception {
-                                        return aidlApi.getImageSrcPaths();
-                                    }
-                                }).map(new Function<JSONObject, Boolean>() {
-                            @Override
-                            public Boolean apply(@io.reactivex.annotations.NonNull JSONObject pathJson) throws Exception {
-                                MyApplication.PATHJson=pathJson;
-                                return true;
-                            }
-                        });
-                       Observable<Boolean> ob2= Observable.just( MyApplication.AIDLApi)
-                                .map(new Function<AidlApi, AIDLSetting>() {
-                                    @Override
-                                    public AIDLSetting apply(@io.reactivex.annotations.NonNull AidlApi aidlApi) throws Exception {
-                                        return aidlApi.getAIDLSetting();
-                                    }
-                                }).map(new Function<AIDLSetting, Boolean>() {
-                            @Override
-                            public Boolean apply(@io.reactivex.annotations.NonNull AIDLSetting setting) throws Exception {
-                                MyApplication.AIDLSettting=setting;
-                                return true;
-                            }
-                        });
-                      Observable.zip(ob1, ob2, new BiFunction<Boolean, Boolean, Boolean>() {
-                          @Override
-                          public Boolean apply(@io.reactivex.annotations.NonNull Boolean aBoolean, @io.reactivex.annotations.NonNull Boolean aBoolean2) throws Exception {
-                              return true;
-                          }
-                      }).subscribeOn(Schedulers.io())
-                              .observeOn(AndroidSchedulers.mainThread())
-                              .subscribe(new ActivityObserver<Boolean>(SplashActivity.this) {
-                                  @Override
-                                  public void onNext(Boolean pathJson) {
-                                      populateAutoComplete();
-                                  }
-                              });
+                        //"service.state.ok"
+                        if (MyApplication.AIDLApi==null){
+                            finish();
+                            return;
+                        }
+                        initDataFromAIDL();
                     }
                 });
+    }
+
+    private void initDataFromAIDL() {
+        if (initFlag){
+            return;
+        }
+        initFlag=true;
+        Observable<Boolean> ob1= Observable.just(MyApplication.AIDLApi)
+                .map(new Function<AidlApi, JSONObject>() {
+                    @Override
+                    public JSONObject apply(@io.reactivex.annotations.NonNull AidlApi aidlApi) throws Exception {
+                        return aidlApi.getImageSrcPaths();
+                    }
+                }).map(new Function<JSONObject, Boolean>() {
+                    @Override
+                    public Boolean apply(@io.reactivex.annotations.NonNull JSONObject pathJson) throws Exception {
+                        MyApplication.PATHJson=pathJson;
+                        return true;
+                    }
+                });
+        Observable<Boolean> ob2= Observable.just( MyApplication.AIDLApi)
+                .map(new Function<AidlApi, AIDLSetting>() {
+                    @Override
+                    public AIDLSetting apply(@io.reactivex.annotations.NonNull AidlApi aidlApi) throws Exception {
+                        return aidlApi.getAIDLSetting();
+                    }
+                }).map(new Function<AIDLSetting, Boolean>() {
+                    @Override
+                    public Boolean apply(@io.reactivex.annotations.NonNull AIDLSetting setting) throws Exception {
+                        MyApplication.AIDLSet =setting;
+                        return true;
+                    }
+                });
+        Observable.zip(ob1, ob2, new BiFunction<Boolean, Boolean, Boolean>() {
+            @Override
+            public Boolean apply(@io.reactivex.annotations.NonNull Boolean aBoolean, @io.reactivex.annotations.NonNull Boolean aBoolean2) throws Exception {
+                return true;
+            }
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new ActivityObserver<Boolean>(SplashActivity.this) {
+                    @Override
+                    public void onNext(Boolean pathJson) {
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        super.onError(e);
+                        Toast.makeText(getBaseContext(),e.getMessage(),Toast.LENGTH_LONG).show();
+                        Observable.just(e)
+                                .delay(2,TimeUnit.SECONDS)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(new Consumer<Throwable>() {
+                                    @Override
+                                    public void accept(@io.reactivex.annotations.NonNull Throwable throwable) throws Exception {
+                                        finish();
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        super.onComplete();
+                        populateAutoComplete();
+                    }
+                });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(receiver);
     }
 
     /**

@@ -21,6 +21,7 @@ import java.util.List;
 
 import koolpos.cn.goodsdisplayer.R;
 import koolpos.cn.goodsdisplayer.mvcModel.ProductCategory;
+import koolpos.cn.goodsdisplayer.util.Loger;
 
 /**
  * Created by caroline on 2017/5/29.
@@ -38,6 +39,12 @@ public class CategoryPop extends PopupWindow {
     private TextView btn_cancel;
     RecyclerView listCategroies;
 
+    public void selectAll() {
+        if (typeAdapter!=null){
+            typeAdapter.selectAll();
+        }
+    }
+    CategoryAdapter typeAdapter;
     public CategoryPop(Context context, List<ProductCategory> typeList, final OnSPUSelectedListener listener) {
         this.mContext=context;
         this.view = LayoutInflater.from(mContext).inflate(R.layout.layout_select_type, null);
@@ -54,7 +61,7 @@ public class CategoryPop extends PopupWindow {
                 dismiss();
             }
         };
-        CategoryAdapter typeAdapter = new CategoryAdapter(onSPUSelectedListener);
+         typeAdapter = new CategoryAdapter(onSPUSelectedListener);
         typeAdapter.setData(typeList);
         listCategroies.setAdapter(typeAdapter);
         // 设置外部可点击
@@ -141,6 +148,7 @@ public class CategoryPop extends PopupWindow {
             holder.good_type.setSelected(curIndex == position);
             holder.good_type.setText(data.get(position).getName());
 
+            Loger.i("getIconUrl="+data.get(position).getIconUrl());
             Glide.with(mContext).load(data.get(position).getIconUrl())
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .placeholder(R.mipmap.downloading)
@@ -153,6 +161,16 @@ public class CategoryPop extends PopupWindow {
         @Override
         public int getItemCount() {
             return data.size();
+        }
+
+        public void selectAll() {
+            int position =0 ;
+            final ProductCategory dataTmp = data.get(position);
+            curIndex = position;
+            if (onSPUSelectedListener != null) {
+                onSPUSelectedListener.onSelected(dataTmp);
+            }
+            myNotifyDataSetChanged();
         }
 
         class GoodTypeViewHolder extends RecyclerView.ViewHolder {
