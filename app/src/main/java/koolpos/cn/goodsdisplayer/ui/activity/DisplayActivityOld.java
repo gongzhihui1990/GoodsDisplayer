@@ -374,7 +374,7 @@ public class DisplayActivityOld extends BaseActivity implements DisplayGoodGroup
                         }
                         dataListSizeNow--;
                     }
-                } catch (JSONException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             Loger.d("页大小:" + goodsGroup.size());
@@ -383,7 +383,6 @@ public class DisplayActivityOld extends BaseActivity implements DisplayGoodGroup
     }
 
     public class GoodTypeAdapter extends RecyclerView.Adapter<GoodTypeAdapter.GoodTypeViewHolder>{
-
         private List<ProductTestType> data=new ArrayList<>();
         private int curIndex = 0;
         private ViewPagerAdapter mGridAdapter;

@@ -1,7 +1,11 @@
 package koolpos.cn.goodsdisplayer.rxjava;
 
+import android.os.TransactionTooLargeException;
+import android.widget.Toast;
+
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
+import koolpos.cn.goodsdisplayer.MyApplication;
 import koolpos.cn.goodsdisplayer.ui.activity.BaseActivity;
 
 /**
@@ -29,6 +33,12 @@ public abstract class ActivityObserver<T> implements Observer<T> {
     public void onError(Throwable e) {
         if (disposable != null && mBaseActivity != null) {
             mBaseActivity.removeDisposable(disposable);
+        }
+        e.printStackTrace();
+        if (e instanceof TransactionTooLargeException){
+            Toast.makeText(MyApplication.getContext(),"数据过大,请重试",Toast.LENGTH_LONG).show();
+        }else {
+            Toast.makeText(MyApplication.getContext(),"内部错误："+e.getMessage(),Toast.LENGTH_LONG).show();
         }
     }
 

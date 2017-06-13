@@ -140,12 +140,13 @@ public class CategoryPop extends PopupWindow {
             });
             holder.good_type.setSelected(curIndex == position);
             holder.good_type.setText(data.get(position).getName());
+
             Glide.with(mContext).load(data.get(position).getIconUrl())
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .placeholder(R.mipmap.downloading)
                     .animate(R.anim.zoom_in)
                     .fitCenter()
-                    .error(R.mipmap.download_error)
+                    .error(R.mipmap.category_icon_error)
                     .into(holder.category_icon);
         }
 

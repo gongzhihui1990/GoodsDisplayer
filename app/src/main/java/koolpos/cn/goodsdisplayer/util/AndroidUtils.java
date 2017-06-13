@@ -1,5 +1,6 @@
 package koolpos.cn.goodsdisplayer.util;
 
+import android.animation.ObjectAnimator;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -8,11 +9,17 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
+import android.media.Image;
 import android.provider.Settings;
 import android.widget.ImageView;
 
+import com.bumptech.glide.DrawableRequestBuilder;
+import com.bumptech.glide.DrawableTypeRequest;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 
 import java.util.List;
 
@@ -22,26 +29,27 @@ import koolpos.cn.goodsdisplayer.R;
 public class AndroidUtils {
 
 	public static void loadImageAnim(String url,ImageView imageView){
+		loadImage(url,imageView,true);
+	}
+	public static void loadImage(String url,ImageView imageView,boolean withAnim){
+		DrawableRequestBuilder<String> request;
 		if (url.startsWith("http")||url.startsWith("/")){
-			Glide.with(imageView.getContext())
-					.load(url)
-					.diskCacheStrategy(DiskCacheStrategy.ALL)
-					.placeholder(R.mipmap.downloading)
-					.animate(R.anim.zoom_in)
-					.fitCenter()
-					.error(R.mipmap.download_error)
-					.into(imageView);
+			request=Glide.with(imageView.getContext())
+					.load(url);
 		}else {
 			Loger.i("from warp "+"http://store.troncell.com/"+url);
-			Glide.with(imageView.getContext())
-					.load("http://store.troncell.com/"+url)
-					.diskCacheStrategy(DiskCacheStrategy.ALL)
-					.placeholder(R.mipmap.downloading)
-					.animate(R.anim.zoom_in)
-					.fitCenter()
-					.error(R.mipmap.download_error)
-					.into(imageView);
+			request= Glide.with(imageView.getContext())
+					.load("http://store.troncell.com/"+url);
 		}
+		if (withAnim){
+			request = request.animate(R.anim.zoom_in);
+		}
+		request.diskCacheStrategy(DiskCacheStrategy.ALL)
+				.skipMemoryCache(false)
+				.placeholder(R.drawable.rotate_loading)
+				.error(R.mipmap.download_error)
+				.fitCenter()
+				.into(imageView);
 	}
 	public static Intent getExplicitIntent(Context context, Intent implicitIntent) {
         // Retrieve all services that can match the given intent
@@ -90,7 +98,7 @@ public class AndroidUtils {
 			screenBrightness = Settings.System.getInt(MyApplication.getContext().getContentResolver(),
 					Settings.System.SCREEN_BRIGHTNESS);
 		} catch (Exception localException) {
-
+			localException.printStackTrace();
 		}
 		return screenBrightness;
 	}

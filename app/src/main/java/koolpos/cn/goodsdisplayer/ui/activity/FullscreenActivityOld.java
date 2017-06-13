@@ -120,7 +120,7 @@ public class FullscreenActivityOld extends BaseActivity {
             try {
                 data = aidlApi.getTestListByType(type);
                 notifyDataSetChanged();
-            } catch (JSONException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

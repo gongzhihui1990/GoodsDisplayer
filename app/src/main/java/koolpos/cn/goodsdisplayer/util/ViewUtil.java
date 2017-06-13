@@ -38,7 +38,7 @@ public class ViewUtil {
         Allocation allOut = Allocation.createFromBitmap(rs, outBitmap);
 
         //设定模糊度(注：Radius最大只能设置25.f)
-        blurScript.setRadius(25.0f);
+        blurScript.setRadius(5.0f);
 
         // Perform the Renderscript
         blurScript.setInput(allIn);

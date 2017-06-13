@@ -1,6 +1,13 @@
 package koolpos.cn.goodsdisplayer.api;
 
+import android.annotation.TargetApi;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
 import android.os.RemoteException;
+import android.os.TransactionTooLargeException;
+import android.text.TextUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -8,10 +15,17 @@ import com.google.gson.reflect.TypeToken;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
 import koolpos.cn.goodproviderservice.service.aidl.IGPService;
+import koolpos.cn.goodsdisplayer.MyApplication;
 import koolpos.cn.goodsdisplayer.mvcModel.AIDLSetting;
 import koolpos.cn.goodsdisplayer.mvcModel.AdBean;
 import koolpos.cn.goodsdisplayer.mvcModel.AidlResponse;
@@ -24,7 +38,7 @@ import koolpos.cn.goodsdisplayer.util.Loger;
 /**
  * Created by Administrator on 2017/5/14.
  */
-
+@TargetApi(Build.VERSION_CODES.M)
 public class AidlApi {
     private IGPService service;
 
@@ -88,8 +102,7 @@ public class AidlApi {
         return adList;
     }
 
-    //
-    public List<Goods> getTestListByType(String type) throws JSONException {
+    public List<Goods> getTestListByType(String type) throws JSONException, RemoteException {
         JSONObject request = new JSONObject();
         request.put("action", "local/get/getTestListByType");
         request.put("type", type);
@@ -114,7 +127,7 @@ public class AidlApi {
         return categories;
     }
 
-    public List<Product> getProductList(ProductCategory category) throws JSONException {
+    public List<Product> getProductList(ProductCategory category) throws JSONException, RemoteException {
         JSONObject request = new JSONObject();
         request.put("action", "local/get/products");
         request.put("categoryId", category.getCategoryId());
@@ -125,15 +138,52 @@ public class AidlApi {
         return goodsList;
     }
 
-    private AidlResponse proxyPost(String request) {
+    @TargetApi(Build.VERSION_CODES.M)
+    private AidlResponse proxyPost(String request) throws RemoteException {
         Loger.d("AidlRequset:" + request);
-        String response = "";
+        String responseFile = "";
         try {
-            response = service.proxyPost(request);
+            responseFile = service.proxyPost(request);
         } catch (RemoteException e) {
             e.printStackTrace();
+            if (e instanceof TransactionTooLargeException) {
+                throw e;
+            }
         }
-        Loger.d("AidlResponse:" + response.toString());
-        return new Gson().fromJson(response, AidlResponse.class);
+        Loger.d("AidlResponse file:" + responseFile);
+        String data =getResponseFromFile(responseFile);
+        Loger.d("AidlResponse data:" + data);
+        return new Gson().fromJson(data, AidlResponse.class);
+    }
+
+     private String getJsonFileToString(String jsonFileName) throws IOException {
+        File jsonFile = new File(jsonFileName);
+        InputStream is = new FileInputStream(jsonFile.getAbsolutePath());
+        String line; // 用来保存每行读取的内容
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        line = reader.readLine(); // 读取第一行
+        StringBuilder buffer = new StringBuilder();
+        while (line != null) { // 如果 line 为空说明读完了
+            buffer.append(line); // 将读到的内容添加到 buffer 中
+            buffer.append("\n"); // 添加换行符
+            line = reader.readLine(); // 读取下一行
+        }
+        reader.close();
+        is.close();
+        return buffer.toString();
+    }
+
+    private String getResponseFromFile(String filePath) {
+        AidlResponse defError = new AidlResponse();
+        String contentResponse = "";
+        try {
+             contentResponse = getJsonFileToString(filePath);
+        }catch (Exception e){
+            e.printStackTrace();
+            defError.setMessage("请求解析失败:"+e.getMessage());
+            defError.setCode(-1);
+            contentResponse = defError.toString();
+        }
+        return contentResponse;
     }
 }

@@ -17,13 +17,31 @@ import koolpos.cn.goodsdisplayer.MyApplication;
 
 
 public class CodeBitmap {
+	private static BitMatrix deleteWhite(BitMatrix matrix) {
+		int[] rec = matrix.getEnclosingRectangle();
+		int resWidth = rec[2] + 1;
+		int resHeight = rec[3] + 1;
 
+		BitMatrix resMatrix = new BitMatrix(resWidth, resHeight);
+		resMatrix.clear();
+		for (int i = 0; i < resWidth; i++) {
+			for (int j = 0; j < resHeight; j++) {
+				if (matrix.get(i + rec[0], j + rec[1]))
+					resMatrix.set(i, j);
+			}
+		}
+		return resMatrix;
+	}
 
 	public static Bitmap Create2DCode(String str)  {
 		//生成二维矩阵,编码时指定大小,不要生成了图片以后再进行缩放,这样会模糊导致识别失败
 		BitMatrix matrix = null;
 		try {
-			matrix = new MultiFormatWriter().encode(str, BarcodeFormat.QR_CODE,220,220);
+			Loger.d("DENSITY:"+AndroidUtils.DENSITY);
+			matrix = new MultiFormatWriter().encode(str,
+					BarcodeFormat.QR_CODE,(int)(192*AndroidUtils.DENSITY),
+					(int)(192*AndroidUtils.DENSITY));
+			matrix = deleteWhite(matrix);//删除白边
 		} catch (WriterException e) {
 			e.printStackTrace();
 		}

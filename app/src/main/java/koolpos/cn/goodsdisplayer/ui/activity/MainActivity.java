@@ -1,6 +1,8 @@
 package koolpos.cn.goodsdisplayer.ui.activity;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import io.reactivex.Observable;
+import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
@@ -129,16 +132,71 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
             gridContentView.addItemDecoration(dividerGridItemDecoration);
             gridContentView.setAdapter(productAdapter);
             productAdapter.setSkuDisplayCallBack(new ProductAdapter.SkuDisplayDetailCall() {
+                private boolean isBlock = false;
+
                 @Override
-                public void show(Product product) {
+                public void show(final Product product) {
+                    //防止连续点击
+                    if (isBlock) {
+                        return;
+                    } else {
+                        isBlock = true;
+                        Observable.timer(1000, TimeUnit.MILLISECONDS)
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(Schedulers.io()).subscribe(new Consumer<Long>() {
+                            @Override
+                            public void accept(@NonNull Long aLong) throws Exception {
+                                isBlock = false;
+                            }
+                        });
+                    }
                     stop();
+                    //发射背景图片
+                    Loger.i("背景图片");
+                    View view = getWindow().getDecorView();
+                    Loger.i("背景生成：" + view);
+                    Bitmap cacheBmp = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
+                    Canvas canvas = new Canvas(cacheBmp);
+                    view.draw(canvas);
+                    MyApplication.CacheBitmap = cacheBmp;
+                    Loger.i("背景生成ok");
+                    Observable.just(MyApplication.CacheBitmap)
+                            .delay(200,TimeUnit.MILLISECONDS)
+                            .map(new Function<Bitmap, Intent>() {
+                                @Override
+                                public Intent apply(@NonNull Bitmap bitmap) throws Exception {
+                                    Intent intent = new Intent("CacheBitmapOk");
+                                    intent.putExtra(Product.class.getName(), product);
+                                    Loger.i("背景生成intent");
+                                    return intent;
+                                }
+                            }).subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(new Observer<Intent>() {
+                                @Override
+                                public void onSubscribe(Disposable d) {
+
+                                }
+
+                                @Override
+                                public void onNext(Intent intent) {
+                                    Loger.i("背景生成发射");
+                                    MyApplication.getContext().sendBroadcast(intent);
+                                }
+
+                                @Override
+                                public void onError(Throwable e) {
+                                    e.printStackTrace();
+                                }
+
+                                @Override
+                                public void onComplete() {
+
+                                }
+                            });
                     Intent intent = new Intent(getBaseContext(), ShowDetailActivity.class);
                     intent.putExtra(Product.class.getName(), product);
                     startActivityForResult(intent, showProduct);
-//                    Bitmap cacheBmp = Bitmap.createBitmap(getWindow().getDecorView().getWidth(), getWindow().getDecorView().getHeight(), Bitmap.Config.ARGB_8888);
-//                    Canvas canvas = new Canvas(cacheBmp);
-//                    getWindow().getDecorView().draw(canvas);
-//                    MyApplication.CacheBitmap=cacheBmp;
 //                    Observable.just()
                 }
             });
@@ -159,9 +217,6 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                 CategoryPop.OnSPUSelectedListener spuSelectedListener = new CategoryPop.OnSPUSelectedListener() {
                     @Override
                     public void onSelected(ProductCategory categorySelect) {
-                        //TODO gridAdapter.setCategory(type.getTypeName());
-                        Loger.i("categorySelect:" + categorySelect.toString());
-                        //gridAdapter.setCategory(type.getTypeName());
                         setGridAdapter(aidlApi, categorySelect);
                     }
                 };
@@ -215,6 +270,15 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                     @Override
                     public void onNext(final View.OnClickListener onClickListener) {
                         viewSelectType.setOnClickListener(onClickListener);
+                        viewSelectAll.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                //设置为全部
+                                ProductCategory all=new ProductCategory();
+                                all.setCategoryId(-1);
+                                setGridAdapter(aidlApi,all);
+                            }
+                        });
                     }
                 });
     }
@@ -348,7 +412,7 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                                 switch (adBean.getResourType()) {
                                     case "Image":
                                         Intent intent = new Intent(getBaseContext(), AdImageDisplayActivity.class);
-                                        intent.putExtra(AdBean.class.getName(),adBean);
+                                        intent.putExtra(AdBean.class.getName(), adBean);
                                         startActivityForResult(intent, showAd);
                                         break;
                                 }
