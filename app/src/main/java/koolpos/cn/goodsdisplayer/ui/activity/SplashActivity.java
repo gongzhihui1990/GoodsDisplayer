@@ -61,7 +61,18 @@ public class SplashActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         registerReceiver(receiver,new IntentFilter("service.state.ok"));
         setContentView(R.layout.activity_splash);
-        MyApplication.getInstance().initApp();
+
+        Observable.timer(1, TimeUnit.SECONDS)
+                .map(new Function<Long, Long>() {
+                    @Override
+                    public Long apply(@io.reactivex.annotations.NonNull Long aLong) throws Exception {
+                        MyApplication.getInstance().initApp();
+                        return aLong;
+                    }
+                }).subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe();
+
         Observable.timer(5, TimeUnit.SECONDS)
                 .observeOn(Schedulers.io())
                 .subscribeOn(Schedulers.io())

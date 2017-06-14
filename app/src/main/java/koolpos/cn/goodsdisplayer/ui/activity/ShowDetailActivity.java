@@ -98,6 +98,7 @@ public class ShowDetailActivity extends BaseActivity {
                         Bitmap mTempBitmap = MyApplication.CacheBitmap.copy(Bitmap.Config.ARGB_8888, true);//把当前bitmap赋值给待滤镜处理的bitmap
                         Bitmap blurBitmap = ViewUtil.blurBitmap(mTempBitmap, getBaseContext());
                         mTempBitmap.recycle();
+                        mTempBitmap=null;
                         Loger.i("blur end");
                         return blurBitmap;
                     }
@@ -118,8 +119,8 @@ public class ShowDetailActivity extends BaseActivity {
                         }
 
                         @Override
-                        public void onNext(Bitmap blurBitmao) {
-                            ivBackGround.setBackgroundDrawable(new BitmapDrawable(blurBitmao));
+                        public void onNext(Bitmap blurBitmap) {
+                            ivBackGround.setBackgroundDrawable(new BitmapDrawable(blurBitmap));
                             ivBackGround.setAlpha(0.3f);
                             final float fromAlpha = 0f;
                             final float toAlpha = 0.3f;

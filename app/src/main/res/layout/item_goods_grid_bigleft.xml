@@ -12,7 +12,7 @@
         android:id="@+id/item_a_big"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="400"
+        android:layout_weight="430"
         android:background="@drawable/shape_item">
 
         <include

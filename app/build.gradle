@@ -47,6 +47,9 @@ dependencies {
     compile 'com.google.code.gson:gson:2.8.0'
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+    /*leakcanary*/
+    compile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
+    compile 'com.squareup.leakcanary:leakcanary-watcher:1.5.1'
 //    compile 'com.zhy:percent-support-extends:1.0.1'
 //    compile 'com.android.support:percent:25.3.1'
 }

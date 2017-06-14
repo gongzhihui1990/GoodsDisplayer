@@ -71,6 +71,16 @@ public class AidlApi {
         }
         return ptList;
     }
+    public boolean isServerStateOk() throws Exception {
+        JSONObject request = new JSONObject();
+        request.put("action", "local/get/appState");
+        AidlResponse response = proxyPost(request.toString());
+        JSONObject data = new JSONObject(response.getData());
+        if ("Ok".equals(data.optString("stateEnum"))){
+            return true;
+        }
+        return false;
+    }
 
     public JSONObject getImageSrcPaths() throws Exception {
         JSONObject request = new JSONObject();

@@ -11,13 +11,11 @@ import android.graphics.Typeface;
 import android.os.IBinder;
 import android.widget.Toast;
 
+import com.squareup.leakcanary.LeakCanary;
+import com.squareup.leakcanary.RefWatcher;
+
 import org.json.JSONObject;
 
-import java.util.concurrent.TimeUnit;
-
-import io.reactivex.Observable;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.functions.Consumer;
 import koolpos.cn.goodproviderservice.service.aidl.IGPService;
 import koolpos.cn.goodsdisplayer.api.AidlApi;
 import koolpos.cn.goodsdisplayer.mvcModel.AIDLSetting;
@@ -45,52 +43,75 @@ public class MyApplication extends Application {
     public static AIDLSetting AIDLSet;
 
     public static JSONObject PATHJson;
+    private void checkServerState(){
+        try {
+            if (AIDLApi.isServerStateOk()) {
+                getContext().sendBroadcast(new Intent("service.state.ok"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     private ServiceConnection connection = new ServiceConnection() {
 
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             IGPService gpService = IGPService.Stub.asInterface(iBinder);
             AIDLApi = new AidlApi(gpService);
+            checkServerState();
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            Toast.makeText(getContext(),"服务程序连接断开,请重启应用",Toast.LENGTH_LONG).show();
-            canInit=true;
+            Toast.makeText(getContext(), "服务程序连接断开,请重启应用", Toast.LENGTH_LONG).show();
+            canInit = true;
         }
     };
     public static Typeface FZ_GBK;
+
+    private RefWatcher refWatcher;
+
+    public static RefWatcher getRefWatcher(Context context) {
+        MyApplication application = (MyApplication) context.getApplicationContext();
+        return application.refWatcher;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
         instance = this;
+        refWatcher = LeakCanary.install(MyApplication.this);
 //        initApp();
     }
 
-    private boolean canInit =true;
+    private boolean canInit = true;
+
     public void initApp() {
-        Loger.d("initApp canInit "+canInit);
-        if (!canInit){
+        Loger.d("initApp canInit " + canInit);
+        if (!canInit) {
+            checkServerState();
             return;
         }
-        canInit=false;
+        canInit = false;
         Intent serviceIntent = new Intent(IGPService.class.getName());
         serviceIntent = AndroidUtils.getExplicitIntent(getBaseContext(), serviceIntent);
-        try{
+        try {
             bindService(serviceIntent, connection, Context.BIND_AUTO_CREATE);
-        }catch (Exception e){
-            Toast.makeText(this,"请安装服务程序后再使用",Toast.LENGTH_LONG).show();
-            canInit=true;
+        } catch (Exception e) {
+            Toast.makeText(this, "请安装服务程序后再使用", Toast.LENGTH_LONG).show();
+            canInit = true;
         }
-        FZ_GBK = Typeface.createFromAsset(getAssets(),"fonts/FZ_GBK.TTF");
+        FZ_GBK = Typeface.createFromAsset(getAssets(), "fonts/FZ_GBK.TTF");
     }
-    public void killQuit(){
-        ActivityManager activityMgr =(ActivityManager)getContext().getSystemService(ACTIVITY_SERVICE);
+
+    public void killQuit() {
+        ActivityManager activityMgr = (ActivityManager) getContext().getSystemService(ACTIVITY_SERVICE);
         activityMgr.killBackgroundProcesses(getPackageName());
         android.os.Process.killProcess(android.os.Process.myPid());
         System.exit(0);
 
     }
+
     @Override
     public void onTerminate() {
         super.onTerminate();

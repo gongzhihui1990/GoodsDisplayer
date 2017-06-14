@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -436,4 +437,5 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
 //        intent.addCategory(Intent.CATEGORY_HOME);
 //        startActivity(intent);
     }
+
 }
