@@ -62,6 +62,7 @@ public class AndroidUtils {
                     @Override
                     public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
 						anim.cancel();
+						Loger.d("----==="+resource.getIntrinsicWidth()+":"+resource.getIntrinsicHeight());
                         return false;
                     }
                 })

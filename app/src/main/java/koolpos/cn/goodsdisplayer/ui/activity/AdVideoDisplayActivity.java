@@ -39,7 +39,7 @@ public class AdVideoDisplayActivity extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_adv_play);
-        String uri = "android.resource://" + getPackageName() + "/" + R.raw.ad1;
+        String uri = "";//android.resource://" + getPackageName() + "/" + R.raw.ad1;
         videoView.setVideoURI(Uri.parse((uri)));
         //videoView.setMediaController(new MediaController(LoginLogoActivity.this));  ／／添加控制台
         videoView.requestFocus();

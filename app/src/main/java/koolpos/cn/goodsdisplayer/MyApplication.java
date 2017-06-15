@@ -30,18 +30,14 @@ public class MyApplication extends Application {
 
     private static MyApplication instance;
     public static Bitmap CacheBitmap;
-
     public static Context getContext() {
         return instance.getBaseContext();
     }
-
     public static MyApplication getInstance() {
         return instance;
     }
-
     public static AidlApi AIDLApi;
     public static AIDLSetting AIDLSet;
-
     public static JSONObject PATHJson;
     private void checkServerState(){
         try {
@@ -68,9 +64,7 @@ public class MyApplication extends Application {
         }
     };
     public static Typeface FZ_GBK;
-
     private RefWatcher refWatcher;
-
     public static RefWatcher getRefWatcher(Context context) {
         MyApplication application = (MyApplication) context.getApplicationContext();
         return application.refWatcher;
@@ -80,7 +74,9 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         instance = this;
-        refWatcher = LeakCanary.install(MyApplication.this);
+        //refWatcher=LeakCanary.install(MyApplication.this);
+        //LeakCanary.enableDisplayLeakActivity(this);
+
 //        initApp();
     }
 

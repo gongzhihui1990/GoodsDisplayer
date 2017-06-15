@@ -5,6 +5,7 @@
 
     <ImageView
         android:id="@+id/good_img"
+        android:scaleType="centerCrop"
         android:layout_gravity="center"
         android:layout_width="@dimen/imgW"
         android:layout_height="@dimen/imgH" />
