@@ -16,6 +16,10 @@ import com.squareup.leakcanary.RefWatcher;
 
 import org.json.JSONObject;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.functions.Consumer;
 import koolpos.cn.goodproviderservice.service.aidl.IGPService;
 import koolpos.cn.goodsdisplayer.api.AidlApi;
 import koolpos.cn.goodsdisplayer.mvcModel.AIDLSetting;
@@ -41,11 +45,21 @@ public class MyApplication extends Application {
     public static JSONObject PATHJson;
     private void checkServerState(){
         try {
+            if (AIDLApi==null){
+               throw new Exception("服务程序连接失败");
+            }
             if (AIDLApi.isServerStateOk()) {
                 getContext().sendBroadcast(new Intent("service.state.ok"));
             }
         } catch (Exception e) {
             e.printStackTrace();
+            Observable.just(e).observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Consumer<Exception>() {
+                        @Override
+                        public void accept(@NonNull Exception e) throws Exception {
+                            Toast.makeText(getContext(),e.getMessage(),Toast.LENGTH_LONG).show();
+                        }
+                    });
         }
     }
     private ServiceConnection connection = new ServiceConnection() {
