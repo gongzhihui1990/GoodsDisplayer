@@ -8,6 +8,6 @@
     <include layout="@layout/item_goods_grid_bigleft"></include>
     <View
         android:layout_width="match_parent"
-        android:layout_height="40dp"/>
+        android:layout_height="10dp"/>
     <include layout="@layout/item_goods_grid_bigright"></include>
 </LinearLayout>

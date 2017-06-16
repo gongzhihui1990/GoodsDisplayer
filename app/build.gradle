@@ -1,3 +1,5 @@
+import java.text.SimpleDateFormat
+
 apply plugin: 'com.android.application'
 
 android {
@@ -8,7 +10,7 @@ android {
         minSdkVersion 14
         targetSdkVersion 25
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     signingConfigs {
@@ -30,6 +32,14 @@ android {
         release {
             minifyEnabled false
             signingConfig signingConfigs.release
+            applicationVariants.all { variant ->
+                variant.outputs.each { output ->
+                    def outputFile = output.outputFile
+                    def fileName = "Display_V${versionName}_@${releaseTime()}.apk"
+                    output.outputFile = new File(outputFile.parent, fileName)
+
+                }
+            }
         }
         debug {
             minifyEnabled false
@@ -37,6 +47,12 @@ android {
         }
     }
 }
+
+static def releaseTime() {
+    SimpleDateFormat format =new SimpleDateFormat("MMdd_HHmm");
+    return format.format(new Date());
+}
+
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
@@ -69,6 +85,4 @@ dependencies {
     /*leakcanary*/
     compile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
     compile 'com.squareup.leakcanary:leakcanary-watcher:1.5.1'
-//    compile 'com.zhy:percent-support-extends:1.0.1'
-//    compile 'com.android.support:percent:25.3.1'
 }

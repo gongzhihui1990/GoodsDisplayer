@@ -25,6 +25,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
+import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 import koolpos.cn.goodsdisplayer.MyApplication;
 import koolpos.cn.goodsdisplayer.R;
@@ -47,19 +48,21 @@ public class SplashActivity extends BaseActivity {
     @BindView(R.id.tv_hint_common)
     TextView tv_hint_common;
 
-    private boolean initFlag=false;
-    BroadcastReceiver receiver =new BroadcastReceiver() {
+    private boolean initFlag = false;
+    BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if ("service.state.ok".equals(intent.getAction())){
+            if ("service.state.ok".equals(intent.getAction())) {
                 initDataFromAIDL();
             }
         }
     };
+    int timeMs = 0;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        registerReceiver(receiver,new IntentFilter("service.state.ok"));
+        registerReceiver(receiver, new IntentFilter("service.state.ok"));
         setContentView(R.layout.activity_splash);
 
         Observable.timer(1, TimeUnit.SECONDS)
@@ -72,29 +75,54 @@ public class SplashActivity extends BaseActivity {
                 }).subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
                 .subscribe();
-
-        Observable.timer(5, TimeUnit.SECONDS)
-                .observeOn(Schedulers.io())
+        Observable.interval(0, 1, TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
-                .subscribe(new Consumer<Long>() {
+                .map(new Function<Long, Integer>() {
                     @Override
-                    public void accept(@io.reactivex.annotations.NonNull Long aLong) throws Exception {
-                        //"service.state.ok"
-                        if (MyApplication.AIDLApi==null){
-                            finish();
-                            return;
-                        }
-                        initDataFromAIDL();
+                    public Integer apply(@io.reactivex.annotations.NonNull Long aLong) throws Exception {
+                        return 30;
                     }
-                });
+                }).map(new Function<Integer, Integer>() {
+            @Override
+            public Integer apply(@io.reactivex.annotations.NonNull Integer duration) throws Exception {
+                int totalSeconds = duration;
+                int curSeconds = timeMs++;
+                int remainSeconds = totalSeconds - curSeconds;
+                return remainSeconds;
+            }
+        }).filter(new Predicate<Integer>() {
+            @Override
+            public boolean test(@io.reactivex.annotations.NonNull Integer remainSeconds) throws Exception {
+                if (remainSeconds >= 0) {
+                    return true;
+                }
+                return false;
+            }
+        }).subscribe(new Consumer<Integer>() {
+            @Override
+            public void accept(@io.reactivex.annotations.NonNull Integer remainSeconds) throws Exception {
+                Loger.e("remainSeconds:" + remainSeconds);
+                if (remainSeconds == 0) {
+                    if (MyApplication.AIDLApi == null) {
+                        finish();
+                        return;
+                    }
+                    initDataFromAIDL();
+                } else {
+                    tv_hint_common.setText("服务初始化中，请稍等" + remainSeconds + "...");
+                }
+
+            }
+        });
     }
 
     private void initDataFromAIDL() {
-        if (initFlag){
+        if (initFlag) {
             return;
         }
-        initFlag=true;
-        Observable<Boolean> ob1= Observable.just(MyApplication.AIDLApi)
+        initFlag = true;
+        Observable<Boolean> ob1 = Observable.just(MyApplication.AIDLApi)
                 .map(new Function<AidlApi, JSONObject>() {
                     @Override
                     public JSONObject apply(@io.reactivex.annotations.NonNull AidlApi aidlApi) throws Exception {
@@ -103,11 +131,11 @@ public class SplashActivity extends BaseActivity {
                 }).map(new Function<JSONObject, Boolean>() {
                     @Override
                     public Boolean apply(@io.reactivex.annotations.NonNull JSONObject pathJson) throws Exception {
-                        MyApplication.PATHJson=pathJson;
+                        MyApplication.PATHJson = pathJson;
                         return true;
                     }
                 });
-        Observable<Boolean> ob2= Observable.just( MyApplication.AIDLApi)
+        Observable<Boolean> ob2 = Observable.just(MyApplication.AIDLApi)
                 .map(new Function<AidlApi, AIDLSetting>() {
                     @Override
                     public AIDLSetting apply(@io.reactivex.annotations.NonNull AidlApi aidlApi) throws Exception {
@@ -116,7 +144,7 @@ public class SplashActivity extends BaseActivity {
                 }).map(new Function<AIDLSetting, Boolean>() {
                     @Override
                     public Boolean apply(@io.reactivex.annotations.NonNull AIDLSetting setting) throws Exception {
-                        MyApplication.AIDLSet =setting;
+                        MyApplication.AIDLSet = setting;
                         return true;
                     }
                 });
@@ -135,9 +163,9 @@ public class SplashActivity extends BaseActivity {
                     @Override
                     public void onError(Throwable e) {
                         super.onError(e);
-                        Toast.makeText(getBaseContext(),e.getMessage(),Toast.LENGTH_LONG).show();
+                        Toast.makeText(getBaseContext(), e.getMessage(), Toast.LENGTH_LONG).show();
                         Observable.just(e)
-                                .delay(2,TimeUnit.SECONDS)
+                                .delay(2, TimeUnit.SECONDS)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(new Consumer<Throwable>() {

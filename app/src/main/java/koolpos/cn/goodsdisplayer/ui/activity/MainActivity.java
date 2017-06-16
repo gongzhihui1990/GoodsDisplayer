@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -161,7 +160,7 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                     MyApplication.CacheBitmap = cacheBmp;
                     Loger.i("背景生成ok");
                     Observable.just(MyApplication.CacheBitmap)
-                            .delay(200,TimeUnit.MILLISECONDS)
+                            .delay(200, TimeUnit.MILLISECONDS)
                             .map(new Function<Bitmap, Intent>() {
                                 @Override
                                 public Intent apply(@NonNull Bitmap bitmap) throws Exception {
@@ -203,7 +202,9 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
         }
         productAdapter.setCategory(categorySelect);
     }
+
     private CategoryPop categoryPop;
+
     private void initUI(final AidlApi aidlApi) {
         Observable.just(aidlApi)
                 .map(new Function<AidlApi, List<ProductCategory>>() {
@@ -230,7 +231,7 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                                 startCountingAd();
                             }
                         });
-                categoryPop =new CategoryPop(getBaseContext(), productCategories, spuSelectedListener);
+                categoryPop = new CategoryPop(getBaseContext(), productCategories, spuSelectedListener);
                 return categoryPop;
             }
         }).map(new Function<CategoryPop, View.OnClickListener>() {
@@ -306,11 +307,35 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
 
     private Disposable mRoundSubscribe;
     private Disposable mAdSubscribe;
+    private Disposable mBackAllSubscribe;
 
     private int speedPeriod = 100;
     private int startPeriod = 1000;
     private int replayPeriod = 3000;
     private boolean inverse = false;
+
+    private void backAllFuture() {
+        if (mBackAllSubscribe != null) {
+            if (!mBackAllSubscribe.isDisposed()){
+                return;
+            }
+        }
+        mBackAllSubscribe = Observable.timer(reSetAllPeriod, TimeUnit.SECONDS)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<Long>() {
+                    @Override
+                    public void accept(@NonNull Long aLong) throws Exception {
+                        categoryPop.selectAll();
+                    }
+                });
+    }
+
+    private void backAllCancel() {
+        if (mBackAllSubscribe!=null&&!mBackAllSubscribe.isDisposed()){
+            mBackAllSubscribe.dispose();
+        }
+    }
 
     //开始轮播
     public void startDisplay() {
@@ -323,6 +348,13 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                 .subscribe(new Consumer<Long>() {
                     @Override
                     public void accept(@NonNull Long aLong) throws Exception {
+
+                        if (!gridContentView.canScrollHorizontally(-1)
+                                && !gridContentView.canScrollHorizontally(1)) {
+                            backAllFuture();
+                        } else {
+                            backAllCancel();
+                        }
                         if (inverse) {
                             if (gridContentView.canScrollHorizontally(-1)) {
                                 gridContentView.scrollBy(-1, 0);
@@ -351,6 +383,12 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                 .subscribe(new Consumer<Long>() {
                     @Override
                     public void accept(@NonNull Long aLong) throws Exception {
+                        if (!gridContentView.canScrollHorizontally(-1)
+                                && !gridContentView.canScrollHorizontally(1)) {
+                            backAllFuture();
+                        } else {
+                            backAllCancel();
+                        }
                         if (inverse) {
                             if (gridContentView.canScrollHorizontally(-1)) {
                                 gridContentView.scrollBy(-1, 0);
@@ -388,9 +426,8 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
     }
 
     private int adWaitingPeriod = MyApplication.AIDLSet.getIntervalAd();
-
+    private int reSetAllPeriod = MyApplication.AIDLSet.getIntervalReSetAll();
     private int adIndex = 0;
-
     //adWaitingPeriod d秒后 播放广播
     private void startCountingAd() {
         if (mAdSubscribe != null) {

@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -23,8 +22,8 @@ import butterknife.BindView;
 import koolpos.cn.goodproviderservice.service.aidl.IGPService;
 import koolpos.cn.goodsdisplayer.R;
 import koolpos.cn.goodsdisplayer.api.AidlApi;
-import koolpos.cn.goodsdisplayer.mvcModel.ProductTestType;
 import koolpos.cn.goodsdisplayer.mvcModel.Goods;
+import koolpos.cn.goodsdisplayer.mvcModel.ProductTestType;
 import koolpos.cn.goodsdisplayer.util.AndroidUtils;
 import koolpos.cn.goodsdisplayer.util.Loger;
 
@@ -43,20 +42,20 @@ public class FullscreenActivityOld extends BaseActivity {
 
     private AidlApi aidlApi;
     private IGPService gpService;
-    ServiceConnection connection =new ServiceConnection() {
+    ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            gpService= IGPService.Stub.asInterface(iBinder);
-            aidlApi =new AidlApi(gpService);
+            gpService = IGPService.Stub.asInterface(iBinder);
+            aidlApi = new AidlApi(gpService);
             try {
 //                JSONObject request=new JSONObject();
 //                request.put("action","local/get/all");
 //                String response =gpService.proxyPost(request.toString());
 //                Loger.d("response:"+response);
-                JSONObject request=new JSONObject();
-                request.put("action","local/get/getTypeList");
-                String response =gpService.proxyPost(request.toString());
-                Loger.d("response:"+response);
+                JSONObject request = new JSONObject();
+                request.put("action", "local/get/getTypeList");
+                String response = gpService.proxyPost(request.toString());
+                Loger.d("response:" + response);
 
                 typeAdapter.setData(aidlApi.getTypeList());
 //                JSONObject request=new JSONObject();
@@ -78,27 +77,28 @@ public class FullscreenActivityOld extends BaseActivity {
 
         }
     };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fullscreen);
-        gridAdapter =new GoodContentAdapter();
-        typeAdapter =new GoodTypeAdapter(gridAdapter);
+        gridAdapter = new GoodContentAdapter();
+        typeAdapter = new GoodTypeAdapter(gridAdapter);
         //Content布局
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 3);
         gridLayoutManager.setOrientation(GridLayoutManager.HORIZONTAL);
         gridContent.setLayoutManager(gridLayoutManager);
         gridContent.setAdapter(gridAdapter);
         //Title布局
-        GridLayoutManager titleLayoutManager = new GridLayoutManager(this,1);
+        GridLayoutManager titleLayoutManager = new GridLayoutManager(this, 1);
         titleLayoutManager.setOrientation(GridLayoutManager.VERTICAL);
         listContentTitle.setLayoutManager(titleLayoutManager);
         listContentTitle.setAdapter(typeAdapter);
-        Intent serviceIntent=new Intent(IGPService.class.getName());
-        serviceIntent= AndroidUtils.getExplicitIntent(getBaseContext(),serviceIntent);
+        Intent serviceIntent = new Intent(IGPService.class.getName());
+        serviceIntent = AndroidUtils.getExplicitIntent(getBaseContext(), serviceIntent);
         //serviceIntent.setPackage("koolpos.cn.goodproviderservice");//这里你需要设置你应用的包名
-        boolean bindService=bindService(serviceIntent,connection, Context.BIND_AUTO_CREATE);
-        Loger.d("bindService "+bindService);
+        boolean bindService = bindService(serviceIntent, connection, Context.BIND_AUTO_CREATE);
+        Loger.d("bindService " + bindService);
     }
 
     @Override
@@ -107,14 +107,15 @@ public class FullscreenActivityOld extends BaseActivity {
         super.onDestroy();
     }
 
-    public class GoodContentAdapter extends RecyclerView.Adapter<GoodContentAdapter.GoodViewHolder>{
+    public class GoodContentAdapter extends RecyclerView.Adapter<GoodContentAdapter.GoodViewHolder> {
 
-        private List<Goods> data=new ArrayList<>();
+        private List<Goods> data = new ArrayList<>();
 
         public void setData(ArrayList<Goods> data) {
             this.data = data;
             notifyDataSetChanged();
         }
+
         public void setDataByType(String type) {
             data.clear();
             try {
@@ -127,7 +128,7 @@ public class FullscreenActivityOld extends BaseActivity {
 
         @Override
         public GoodViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View itemView= LayoutInflater.from(parent.getContext()).inflate(R.layout.item_good,parent,false);
+            View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_good, parent, false);
             GoodViewHolder holder = new GoodViewHolder(itemView);
             return holder;
         }
@@ -142,21 +143,24 @@ public class FullscreenActivityOld extends BaseActivity {
             return data.size();
         }
 
-        public class GoodViewHolder extends RecyclerView.ViewHolder{
+        public class GoodViewHolder extends RecyclerView.ViewHolder {
             TextView good_name;
-            public GoodViewHolder(View itemView){
+
+            public GoodViewHolder(View itemView) {
                 super(itemView);
-                good_name= (TextView) itemView.findViewById(R.id.good_name);
+                good_name = (TextView) itemView.findViewById(R.id.good_name);
             }
         }
     }
-    public class GoodTypeAdapter extends RecyclerView.Adapter<GoodTypeAdapter.GoodTypeViewHolder>{
 
-        private List<ProductTestType> data=new ArrayList<>();
+    public class GoodTypeAdapter extends RecyclerView.Adapter<GoodTypeAdapter.GoodTypeViewHolder> {
+
+        private List<ProductTestType> data = new ArrayList<>();
         private int curIndex = 0;
         private GoodContentAdapter gridAdapter;
+
         public GoodTypeAdapter(GoodContentAdapter gridAdapter) {
-            this.gridAdapter=gridAdapter;
+            this.gridAdapter = gridAdapter;
         }
 
         public void setData(List<ProductTestType> data) {
@@ -164,14 +168,15 @@ public class FullscreenActivityOld extends BaseActivity {
             myNotifyDataSetChanged();
         }
 
-        public void myNotifyDataSetChanged(){
+        public void myNotifyDataSetChanged() {
             gridAdapter.setDataByType(data.get(curIndex).getTypeName());
             notifyDataSetChanged();
         }
+
         @Override
         public GoodTypeViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View itemView= LayoutInflater.from(parent.getContext()).inflate(R.layout.item_good_title,parent,false);
-            GoodTypeViewHolder holder=new GoodTypeViewHolder(itemView);
+            View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_good_title, parent, false);
+            GoodTypeViewHolder holder = new GoodTypeViewHolder(itemView);
             return holder;
         }
 
@@ -180,8 +185,8 @@ public class FullscreenActivityOld extends BaseActivity {
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (curIndex!=position){
-                        curIndex =position;
+                    if (curIndex != position) {
+                        curIndex = position;
                         myNotifyDataSetChanged();
                     }
                 }
@@ -195,11 +200,12 @@ public class FullscreenActivityOld extends BaseActivity {
             return data.size();
         }
 
-        public class GoodTypeViewHolder extends RecyclerView.ViewHolder{
+        public class GoodTypeViewHolder extends RecyclerView.ViewHolder {
             TextView good_type;
-            public GoodTypeViewHolder(View itemView){
+
+            public GoodTypeViewHolder(View itemView) {
                 super(itemView);
-                good_type= (TextView) itemView.findViewById(R.id.good_type);
+                good_type = (TextView) itemView.findViewById(R.id.good_type);
             }
         }
     }

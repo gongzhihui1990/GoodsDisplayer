@@ -3,12 +3,15 @@ package koolpos.cn.goodsdisplayer.mvcModel;
 import java.io.Serializable;
 import java.util.Date;
 
+import koolpos.cn.goodsdisplayer.util.Loger;
+
 /**
  * Created by Administrator on 2017/6/12.
  */
 
 public class AIDLSetting implements Serializable {
     private static final long serialVersionUID = -8044448709556111004L;
+    private int intervalReSetAll;
     private int intervalAd;
     private int playLongAd;
     private String deviceSn;
@@ -17,7 +20,22 @@ public class AIDLSetting implements Serializable {
     private boolean loadCacheFirst;
 
     public int getIntervalAd() {
+        if (intervalAd == 0) {
+            intervalAd = 10;
+        }
         return intervalAd;
+    }
+
+    public int getIntervalReSetAll() {
+        Loger.i("intervalReSetAll=" + intervalReSetAll);
+        if (intervalReSetAll == 0) {
+            intervalReSetAll = 10;
+        }
+        return intervalReSetAll;
+    }
+
+    public void setIntervalReSetAll(int intervalReSetAll) {
+        this.intervalReSetAll = intervalReSetAll;
     }
 
     public void setIntervalAd(int intervalAd) {

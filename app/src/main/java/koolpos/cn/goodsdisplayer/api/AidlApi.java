@@ -75,6 +75,9 @@ public class AidlApi {
         JSONObject request = new JSONObject();
         request.put("action", "local/get/appState");
         AidlResponse response = proxyPost(request.toString());
+        if (response==null||response.getData()==null){
+            return false;
+        }
         JSONObject data = new JSONObject(response.getData());
         if ("Ok".equals(data.optString("stateEnum"))){
             return true;
