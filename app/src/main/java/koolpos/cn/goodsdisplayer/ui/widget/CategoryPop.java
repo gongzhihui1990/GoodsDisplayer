@@ -37,7 +37,7 @@ public class CategoryPop extends PopupWindow {
     private View view;
 
     private TextView btn_cancel;
-    RecyclerView listCategroies;
+    private RecyclerView listCategroies;
 
     public void selectAll() {
         if (typeAdapter!=null){
@@ -61,7 +61,7 @@ public class CategoryPop extends PopupWindow {
                 dismiss();
             }
         };
-         typeAdapter = new CategoryAdapter(onSPUSelectedListener);
+        typeAdapter = new CategoryAdapter(onSPUSelectedListener);
         typeAdapter.setData(typeList);
         listCategroies.setAdapter(typeAdapter);
         // 设置外部可点击
@@ -148,9 +148,9 @@ public class CategoryPop extends PopupWindow {
             holder.good_type.setSelected(curIndex == position);
             holder.good_type.setText(data.get(position).getName());
 
-            Loger.i("getIconUrl="+data.get(position).getIconUrl());
-            Glide.with(mContext).load(data.get(position).getIconUrl())
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+            Loger.i("getImageUrl="+data.get(position).getImageUrl());
+            Glide.with(mContext).load(data.get(position).getImageUrl())
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .placeholder(R.mipmap.downloading)
                     .animate(R.anim.zoom_in)
                     .fitCenter()

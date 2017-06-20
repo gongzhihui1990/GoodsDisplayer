@@ -24,6 +24,7 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.functions.Consumer;
 import koolpos.cn.goodproviderservice.service.aidl.IGPService;
 import koolpos.cn.goodsdisplayer.api.AidlApi;
+import koolpos.cn.goodsdisplayer.constans.Action;
 import koolpos.cn.goodsdisplayer.mvcModel.AIDLSetting;
 import koolpos.cn.goodsdisplayer.util.AndroidUtils;
 import koolpos.cn.goodsdisplayer.util.Loger;
@@ -51,7 +52,7 @@ public class MyApplication extends Application {
                throw new Exception("服务程序连接失败");
             }
             if (AIDLApi.isServerStateOk()) {
-                getContext().sendBroadcast(new Intent("service.state.ok"));
+                getContext().sendBroadcast(new Intent(Action.State_Ok));
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,6 +1,9 @@
 package koolpos.cn.goodsdisplayer.ui.activity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.net.Uri;
@@ -33,6 +36,7 @@ import io.reactivex.schedulers.Schedulers;
 import koolpos.cn.goodsdisplayer.MyApplication;
 import koolpos.cn.goodsdisplayer.R;
 import koolpos.cn.goodsdisplayer.api.AidlApi;
+import koolpos.cn.goodsdisplayer.constans.Action;
 import koolpos.cn.goodsdisplayer.constans.ImageEnum;
 import koolpos.cn.goodsdisplayer.mvcModel.AdBean;
 import koolpos.cn.goodsdisplayer.mvcModel.Product;
@@ -43,6 +47,7 @@ import koolpos.cn.goodsdisplayer.ui.fragment.DisplayGoodGroupFragment;
 import koolpos.cn.goodsdisplayer.ui.widget.CategoryPop;
 import koolpos.cn.goodsdisplayer.ui.widget.GridSpacingItemDecoration;
 import koolpos.cn.goodsdisplayer.util.Loger;
+import koolpos.cn.goodsdisplayer.util.SimpleToast;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -61,16 +66,29 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
     @BindView(R.id.image_title_bar)
     ImageView imageTitleBar;
 
+    private List<AdBean> adBeanList = new ArrayList<>();
+
+    private final int showProduct = 10;
+    private final int showAd = 11;
+    private ProductAdapter productAdapter;
+
+    private Disposable mRoundSubscribe;
+    private Disposable mAdSubscribe;
+    private Disposable mBackAllSubscribe;
+
+    private int speedPeriod = 100;
+    private int startPeriod = 1000;
+    private int replayPeriod = 3000;
+
+    private boolean inverse = false;
+    private int adWaitingPeriod = MyApplication.AIDLSet.getIntervalAd();
+    private int reSetAllPeriod = MyApplication.AIDLSet.getIntervalReSetAll();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fullscreen);
         Glide.with(MyApplication.getContext()).resumeRequests();
         gridContentView.setLayoutManager(new LinearLayoutManager(getBaseContext(), LinearLayoutManager.HORIZONTAL, false));
-        initUI(MyApplication.AIDLApi);
-        initAd();
-        startDisplay();
-        startCountingAd();
         gridContentView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -88,13 +106,47 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                 return false;
             }
         });
+
+//        initUI(MyApplication.AIDLApi);
+//        initAd();
+//        initSpecialUI();
+//
+//        startDisplay();
+//        startCountingAd();
+        init();
+        registerReceiver(receiver,new IntentFilter( Action.State_Update));
+    }
+    //TODO
+    BroadcastReceiver receiver =new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Action.State_Update)){
+                init();
+            }
+        }
+    };
+
+    private void init(){
+        try {
+            MyApplication.PATHJson= MyApplication.AIDLApi.getImageSrcPaths();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        initUI(MyApplication.AIDLApi);
+        initAd();
+        initSpecialUI();
+        adWaitingPeriod = MyApplication.AIDLSet.getIntervalAd();
+        reSetAllPeriod = MyApplication.AIDLSet.getIntervalReSetAll();
+        startDisplay();
+        startCountingAd();
+    }
+    private void initSpecialUI(){
         setImageDrawableFromSD(imageTitleBar, ImageEnum.TITLE_BAR);
         setBackgroundDrawableFromSD(main_bg, ImageEnum.MAIN_BG);
         setBackgroundDrawableFromSD(viewSelectAll, ImageEnum.HOME_BTN);
         setBackgroundDrawableFromSD(viewSelectType, ImageEnum.SEARCH_BTN);
     }
 
-    private List<AdBean> adBeanList = new ArrayList<>();
 
     private void initAd() {
 
@@ -119,10 +171,7 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                 });
     }
 
-    private final int showProduct = 10;
-    private final int showAd = 11;
 
-    private ProductAdapter productAdapter;
 
     private void setGridAdapter(final AidlApi aidlApi, ProductCategory categorySelect) {
         if (productAdapter == null) {
@@ -297,6 +346,7 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
     @Override
     protected void onDestroy() {
         stop();
+        unregisterReceiver(receiver);
         super.onDestroy();
     }
 
@@ -305,14 +355,7 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
 
     }
 
-    private Disposable mRoundSubscribe;
-    private Disposable mAdSubscribe;
-    private Disposable mBackAllSubscribe;
 
-    private int speedPeriod = 100;
-    private int startPeriod = 1000;
-    private int replayPeriod = 3000;
-    private boolean inverse = false;
 
     private void backAllFuture() {
         if (mBackAllSubscribe != null) {
@@ -425,8 +468,6 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
         }
     }
 
-    private int adWaitingPeriod = MyApplication.AIDLSet.getIntervalAd();
-    private int reSetAllPeriod = MyApplication.AIDLSet.getIntervalReSetAll();
     private int adIndex = 0;
     //adWaitingPeriod d秒后 播放广播
     private void startCountingAd() {
@@ -453,11 +494,6 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                                         break;
                                 }
                             }
-
-//                            Loger.d("play- "+pos+"/"+size+" : "+.toString());
-                            //TODO 展示图片广告
-//                            Intent intent = new Intent(getBaseContext(), AdVideoDisplayActivity.class);
-//                            startActivityForResult(intent, showAd);
                         } else {
                             Loger.d("play- null");
                         }

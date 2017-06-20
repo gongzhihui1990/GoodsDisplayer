@@ -11,7 +11,7 @@ import koolpos.cn.goodsdisplayer.util.Loger;
 
 public class AIDLSetting implements Serializable {
     private static final long serialVersionUID = -8044448709556111004L;
-    private int intervalReSetAll;
+    private int intervalReset;
     private int intervalAd;
     private int playLongAd;
     private String deviceSn;
@@ -27,15 +27,15 @@ public class AIDLSetting implements Serializable {
     }
 
     public int getIntervalReSetAll() {
-        Loger.i("intervalReSetAll=" + intervalReSetAll);
-        if (intervalReSetAll == 0) {
-            intervalReSetAll = 10;
+        Loger.i("intervalReSetAll=" + intervalReset);
+        if (intervalReset == 0) {
+            intervalReset = 10;
         }
-        return intervalReSetAll;
+        return intervalReset;
     }
 
     public void setIntervalReSetAll(int intervalReSetAll) {
-        this.intervalReSetAll = intervalReSetAll;
+        this.intervalReset = intervalReSetAll;
     }
 
     public void setIntervalAd(int intervalAd) {

@@ -145,10 +145,12 @@ public class AidlApi {
         List<ProductCategory> warpedCategories =new ArrayList<>();
         if (categories!=null&&categories.size()!=0){
             //添加‘全部’分类
-            String path =MyApplication.PATHJson.optString(ImageEnum.SEARCH_BTN.name());
+            String path =MyApplication.PATHJson.optString(ImageEnum.HOME_BTN.name());
+            Loger.d("path all:"+path);
             ProductCategory categoryAll=new ProductCategory();
             categoryAll.setCategoryId(-1);
             categoryAll.setName("全部");
+            categoryAll.setIconUrl(path);
             categoryAll.setIconUrl(path);
             warpedCategories.add(categoryAll);
             warpedCategories.addAll(categories);

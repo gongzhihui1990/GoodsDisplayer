@@ -30,6 +30,7 @@ import io.reactivex.schedulers.Schedulers;
 import koolpos.cn.goodsdisplayer.MyApplication;
 import koolpos.cn.goodsdisplayer.R;
 import koolpos.cn.goodsdisplayer.api.AidlApi;
+import koolpos.cn.goodsdisplayer.constans.Action;
 import koolpos.cn.goodsdisplayer.mvcModel.AIDLSetting;
 import koolpos.cn.goodsdisplayer.rxjava.ActivityObserver;
 import koolpos.cn.goodsdisplayer.util.Loger;
@@ -52,7 +53,7 @@ public class SplashActivity extends BaseActivity {
     BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if ("service.state.ok".equals(intent.getAction())) {
+            if (Action.State_Ok.equals(intent.getAction())) {
                 initDataFromAIDL();
             }
         }
@@ -62,7 +63,7 @@ public class SplashActivity extends BaseActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        registerReceiver(receiver, new IntentFilter("service.state.ok"));
+        registerReceiver(receiver, new IntentFilter(Action.State_Ok));
         setContentView(R.layout.activity_splash);
 
         Observable.timer(1, TimeUnit.SECONDS)
