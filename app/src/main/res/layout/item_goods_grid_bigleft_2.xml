@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/grid_item"
+    android:layout_height="0dp"
+    android:layout_weight="1"
+    android:layout_width="match_parent"
+    android:orientation="horizontal">
+    <!--android:layout_width="@dimen/gird_width"-->
+    <!--android:layout_height="@dimen/gird_height"-->
+    <FrameLayout
+        android:id="@+id/item_c_big"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="430"
+        android:background="@drawable/shape_item">
+
+        <include
+            layout="@layout/item_good_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </FrameLayout>
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="30" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="200"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:id="@+id/item_c_small_1"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="190"
+            android:background="@drawable/shape_item">
+
+            <include
+                layout="@layout/item_good_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </FrameLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="30" />
+
+        <FrameLayout
+            android:id="@+id/item_c_small_2"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="190"
+            android:background="@drawable/shape_item">
+
+            <include
+                layout="@layout/item_good_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </FrameLayout>
+    </LinearLayout>
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="30" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="200"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:id="@+id/item_c_small_3"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="190"
+            android:background="@drawable/shape_item">
+
+            <include
+                layout="@layout/item_good_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </FrameLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="30" />
+
+        <FrameLayout
+            android:id="@+id/item_c_small_4"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="190"
+            android:background="@drawable/shape_item">
+
+            <include
+                layout="@layout/item_good_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </FrameLayout>
+    </LinearLayout>
+</LinearLayout>

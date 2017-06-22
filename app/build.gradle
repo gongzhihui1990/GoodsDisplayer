@@ -37,7 +37,6 @@ android {
                     def outputFile = output.outputFile
                     def fileName = "Display_V${versionName}_@${releaseTime()}.apk"
                     output.outputFile = new File(outputFile.parent, fileName)
-
                 }
             }
         }

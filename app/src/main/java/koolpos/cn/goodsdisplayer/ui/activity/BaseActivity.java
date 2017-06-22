@@ -214,56 +214,20 @@ public class BaseActivity extends AppCompatActivity {
                 });
     }
 
-    //    protected final void setBackground(final View view, final ImageEnum imageEnum){
-//        Observable.just(MyApplication.PATHJson)
-//                .filter(new Predicate<JSONObject>() {
-//                    @Override
-//                    public boolean test(@NonNull JSONObject pathJson) throws Exception {
-//                        if (pathJson==null){
-//                            return false;
-//                        }
-//                        String path =pathJson.optString(imageEnum.name());
-//                        if (TextUtils.isEmpty(path)){
-//                            return false;
-//                        }
-//                        return true;
-//                    }
-//                }).map(new Function<JSONObject, File>() {
-//            @Override
-//            public File apply(@NonNull JSONObject pathJson) throws Exception {
-//                String path =pathJson.optString(imageEnum.name());
-//                File fileSrc =new File(path);
-//                return fileSrc;
-//            }
-//        }).subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new ActivityObserver<File>(BaseActivity.this) {
-//                    @Override
-//                    public void onNext(File file) {
-//                        Glide.with(BaseActivity.this)
-//                                .load(file)
-//                                .diskCacheStrategy(DiskCacheStrategy.ALL)
-//                                //.placeholder(R.mipmap.downloading)
-//                                //.error(R.mipmap.download_error)
-//                                .into(view);
-//                    }
-//                });
-//    }
     @Override
     public void setContentView(@LayoutRes int layoutResID) {
         super.setContentView(layoutResID);
         ButterKnife.bind(this);
-        setPortOrLand();
+//        setPortOrLand();
     }
 
 
     private void setPortOrLand() {
-        if (Device.isPAD()) {
-            setLand();
-        } else {
-            setLand();
-//            setPort();
-        }
+//        if (Device.isPAD()) {
+//            setLand();
+//        } else {
+//            setLand();
+//        }
     }
 
     private void setPort() {

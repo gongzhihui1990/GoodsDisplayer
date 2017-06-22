@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/grid_item"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <include layout="@layout/item_goods_grid_bigleft"></include>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="10dp"/>
+    <include layout="@layout/item_goods_grid_bigright"></include>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="10dp"/>
+    <include
+        android:id="@+id/port" layout="@layout/item_goods_grid_bigleft_2"></include>
+
+</LinearLayout>

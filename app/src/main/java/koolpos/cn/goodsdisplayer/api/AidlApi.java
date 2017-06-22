@@ -151,7 +151,7 @@ public class AidlApi {
             categoryAll.setCategoryId(-1);
             categoryAll.setName("全部");
             categoryAll.setIconUrl(path);
-            categoryAll.setIconUrl(path);
+            categoryAll.setImageUrl(path);
             warpedCategories.add(categoryAll);
             warpedCategories.addAll(categories);
         }

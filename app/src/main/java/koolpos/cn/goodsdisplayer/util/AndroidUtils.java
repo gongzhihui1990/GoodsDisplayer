@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -28,7 +29,9 @@ import koolpos.cn.goodsdisplayer.MyApplication;
 import koolpos.cn.goodsdisplayer.R;
 
 public class AndroidUtils {
-
+	public static boolean isScreenOriatationPortrait() {
+		return MyApplication.getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+	}
 	public static void loadImageAnim(String url,ImageView imageView){
 		loadImage(url,imageView,true);
 	}

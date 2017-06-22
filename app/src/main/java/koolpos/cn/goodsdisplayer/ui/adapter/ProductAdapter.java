@@ -7,11 +7,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -51,6 +49,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ItemView
         View a3;
         @BindView(R.id.item_a_small_4)
         View a4;
+
         @BindView(R.id.item_b_big)
         View bb;
         @BindView(R.id.item_b_small_1)
@@ -62,6 +61,16 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ItemView
         @BindView(R.id.item_b_small_4)
         View b4;
 
+        @BindView(R.id.item_c_big)
+        View cb;
+        @BindView(R.id.item_c_small_1)
+        View c1;
+        @BindView(R.id.item_c_small_2)
+        View c2;
+        @BindView(R.id.item_c_small_3)
+        View c3;
+        @BindView(R.id.item_c_small_4)
+        View c4;
         public ItemViewHolder(final View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
@@ -69,7 +78,10 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ItemView
                     .map(new Function<View, Integer>() {
                         @Override
                         public Integer apply(@NonNull View view) throws Exception {
-                            int width =view.getHeight();
+                            int width = view.getHeight();
+                            if (AndroidUtils.isScreenOriatationPortrait()){
+                                width = width*2/3;
+                            }
                             return width;
                         }
                     }).subscribeOn(AndroidSchedulers.mainThread())
@@ -82,8 +94,8 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ItemView
 
                         @Override
                         public void onNext(Integer width) {
-                            ViewGroup.LayoutParams lp=itemView.getLayoutParams();
-                            lp.width=width;
+                            ViewGroup.LayoutParams lp = itemView.getLayoutParams();
+                            lp.width = width;
                             itemView.setLayoutParams(lp);
                         }
 
@@ -101,14 +113,16 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ItemView
     }
 
     private List<Product[]> goodGroups = new ArrayList<>();
-    private final int GroupSize = 10;
+
+    private final int GroupSize = AndroidUtils.isScreenOriatationPortrait() ? 15 : 10;
 
     private AidlApi aidlApi;
 
     private BaseActivity mActivity;
+
     public ProductAdapter(AidlApi aidlApi, BaseActivity baseActivity) {
         this.aidlApi = aidlApi;
-        this.mActivity=baseActivity;
+        this.mActivity = baseActivity;
     }
 
     @Override
@@ -141,7 +155,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ItemView
                             if (index == group.length - 1) {//到达单页数组最后一项
                                 //添加单页数组
                                 goodsGroupTmp.add(group);
-                                if (fillModeItems == null){
+                                if (fillModeItems == null) {
                                     fillModeItems = group.clone();
                                 }
                                 //新建单页的大小
@@ -177,24 +191,32 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ItemView
 
     @Override
     public ItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View item = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_goods_grid, parent, false);
-        return new ItemViewHolder(item);
+        if (AndroidUtils.isScreenOriatationPortrait()){
+            View item = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_goods_grid_port, parent, false);
+            item.findViewById(R.id.port).setVisibility(View.VISIBLE);
+            return new ItemViewHolder(item);
+        }else {
+            View item = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_goods_grid_port, parent, false);
+            item.findViewById(R.id.port).setVisibility(View.GONE);
+            return new ItemViewHolder(item);
+
+        }
     }
 
     @Override
     public void onBindViewHolder(ItemViewHolder holder, int position) {
         Product[] goodsTmp = goodGroups.get(position);
-        Product[] goods = new Product[10];
-        Loger.d("goodsTmp len="+goodsTmp.length);
-        for (int i=0;i<goods.length;i++){
-            if (i<goodsTmp.length){
+        Product[] goods = new Product[GroupSize];
+        Loger.d("goodsTmp len=" + goodsTmp.length);
+        for (int i = 0; i < goods.length; i++) {
+            if (i < goodsTmp.length) {
                 goods[i] = goodsTmp[i];
-            }else {
-                if (fillMode&&fillModeItems!=null&&fillModeItems.length>i){
+            } else {
+                if (fillMode && fillModeItems != null && fillModeItems.length > i) {
                     //填满格子
                     Loger.d("填满格子");
                     goods[i] = fillModeItems[i];
-                }else {
+                } else {
                     Loger.e("不填满格子");
                     goods[i] = null;
                 }
@@ -205,52 +227,20 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ItemView
         renderGood(holder.a2, goods[2]);
         renderGood(holder.a3, goods[3]);
         renderGood(holder.a4, goods[4]);
+
         renderGood(holder.bb, goods[5]);
         renderGood(holder.b1, goods[6]);
         renderGood(holder.b2, goods[7]);
         renderGood(holder.b3, goods[8]);
         renderGood(holder.b4, goods[9]);
 
-//        if (goods.length <= 0) {
-//            return;
-//        }
-//        renderGood(holder.ab, goods[0]);
-//        if (goods.length <= 1) {
-//            return;
-//        }
-//        renderGood(holder.a1, goods[1]);
-//        if (goods.length <= 2) {
-//            return;
-//        }
-//        renderGood(holder.a2, goods[2]);
-//        if (goods.length <= 3) {
-//            return;
-//        }
-//        renderGood(holder.a3, goods[3]);
-//        if (goods.length <= 4) {
-//            return;
-//        }
-//        renderGood(holder.a4, goods[4]);
-//        if (goods.length <= 5) {
-//            return;
-//        }
-//        renderGood(holder.bb, goods[5]);
-//        if (goods.length <= 6) {
-//            return;
-//        }
-//        renderGood(holder.b1, goods[6]);
-//        if (goods.length <= 7) {
-//            return;
-//        }
-//        renderGood(holder.b2, goods[7]);
-//        if (goods.length <= 8) {
-//            return;
-//        }
-//        renderGood(holder.b3, goods[8]);
-//        if (goods.length <= 9) {
-//            return;
-//        }
-//        renderGood(holder.b4, goods[9]);
+        if (GroupSize==15){
+            renderGood(holder.cb, goods[10]);
+            renderGood(holder.c1, goods[11]);
+            renderGood(holder.c2, goods[12]);
+            renderGood(holder.c3, goods[13]);
+            renderGood(holder.c4, goods[14]);
+        }
     }
 
     public interface SkuDisplayDetailCall {
@@ -282,13 +272,14 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ItemView
         switch (idRoot) {
             case R.id.item_a_big:
             case R.id.item_b_big:
+            case R.id.item_c_big:
                 ivGood.setPadding(3, 3, 3, 3);
                 break;
             default:
                 ivGood.setPadding(3, 3, 3, 3);
                 break;
         }
-        AndroidUtils.loadImageAnim(good.getPicUrl(),ivGood);
+        AndroidUtils.loadImageAnim(good.getPicUrl(), ivGood);
 //            Glide.with(view.getContext())
 //                    .load(good.getPicUrl())
 //                    .diskCacheStrategy(DiskCacheStrategy.ALL)
