@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/white"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     tools:context="koolpos.cn.goodsdisplayer.ui.activity.MainActivity">
 
 
@@ -11,7 +11,13 @@
         android:id="@+id/tv_hint_common"
         android:gravity="center"
         android:text="加载中。。。"
+        android:layout_weight="1"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="0dp" />
 
+    <TextView
+        android:id="@+id/tv_version"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 </LinearLayout>

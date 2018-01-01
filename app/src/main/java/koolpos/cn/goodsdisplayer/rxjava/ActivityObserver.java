@@ -15,7 +15,7 @@ import koolpos.cn.goodsdisplayer.ui.activity.BaseActivity;
 public abstract class ActivityObserver<T> implements Observer<T> {
     private BaseActivity mBaseActivity;
 
-    public ActivityObserver(BaseActivity activity) {
+    protected ActivityObserver(BaseActivity activity) {
         mBaseActivity = activity;
     }
 

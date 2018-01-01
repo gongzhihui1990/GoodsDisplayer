@@ -16,8 +16,12 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+
+import net.gtr.framework.rx.ProgressObserverImplementation;
+import net.gtr.framework.rx.RxHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +37,7 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
+import koolpos.cn.goodsdisplayer.BuildConfig;
 import koolpos.cn.goodsdisplayer.MyApplication;
 import koolpos.cn.goodsdisplayer.R;
 import koolpos.cn.goodsdisplayer.api.AidlApi;
@@ -47,7 +52,6 @@ import koolpos.cn.goodsdisplayer.ui.fragment.DisplayGoodGroupFragment;
 import koolpos.cn.goodsdisplayer.ui.widget.CategoryPop;
 import koolpos.cn.goodsdisplayer.ui.widget.GridSpacingItemDecoration;
 import koolpos.cn.goodsdisplayer.util.Loger;
-import koolpos.cn.goodsdisplayer.util.SimpleToast;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -55,6 +59,8 @@ import koolpos.cn.goodsdisplayer.util.SimpleToast;
  */
 public class MainActivity extends BaseActivity implements DisplayGoodGroupFragment.OnFragmentInteractionListener {
 
+    private final int showProduct = 10;
+    private final int showAd = 11;
     @BindView(R.id.grid_content)
     RecyclerView gridContentView;
     @BindView(R.id.select_type)
@@ -65,11 +71,9 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
     View main_bg;
     @BindView(R.id.image_title_bar)
     ImageView imageTitleBar;
-
+    @BindView(R.id.tv_version)
+    TextView tv_version;
     private List<AdBean> adBeanList = new ArrayList<>();
-
-    private final int showProduct = 10;
-    private final int showAd = 11;
     private ProductAdapter productAdapter;
 
     private Disposable mRoundSubscribe;
@@ -83,10 +87,43 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
     private boolean inverse = false;
     private int adWaitingPeriod = MyApplication.AIDLSet.getIntervalAd();
     private int reSetAllPeriod = MyApplication.AIDLSet.getIntervalReSetAll();
+    private CategoryPop categoryPop;
+    private int adIndex = 0;
+    //TODO
+    BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Action.State_Update)) {
+                init();
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fullscreen);
+        tv_version.setText(BuildConfig.Release_Info);
+
+        final int fadeTime = 30;
+        RxHelper.bindOnUI(RxHelper.countdown(fadeTime, 1, TimeUnit.SECONDS),
+                new ProgressObserverImplementation<Integer>(MainActivity.this) {
+                    @Override
+                    public void onNext(Integer integer) {
+                        super.onNext(integer);
+                        if (integer > 0) {
+                            float alpha = Float.valueOf(integer) / fadeTime ;
+                            Loger.d("alpha=" + alpha * alpha);
+                            tv_version.setAlpha(alpha * alpha);
+                        }
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        super.onComplete();
+                        tv_version.setVisibility(View.GONE);
+                    }
+                }.setShow(false));
         Glide.with(MyApplication.getContext()).resumeRequests();
         gridContentView.setLayoutManager(new LinearLayoutManager(getBaseContext(), LinearLayoutManager.HORIZONTAL, false));
         gridContentView.setOnTouchListener(new View.OnTouchListener() {
@@ -114,21 +151,12 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
 //        startDisplay();
 //        startCountingAd();
         init();
-        registerReceiver(receiver,new IntentFilter( Action.State_Update));
+        registerReceiver(receiver, new IntentFilter(Action.State_Update));
     }
-    //TODO
-    BroadcastReceiver receiver =new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Action.State_Update)){
-                init();
-            }
-        }
-    };
 
-    private void init(){
+    private void init() {
         try {
-            MyApplication.PATHJson= MyApplication.AIDLApi.getImageSrcPaths();
+            MyApplication.PATHJson = MyApplication.AIDLApi.getImageSrcPaths();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -140,16 +168,15 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
         startDisplay();
         startCountingAd();
     }
-    private void initSpecialUI(){
+
+    private void initSpecialUI() {
         setImageDrawableFromSD(imageTitleBar, ImageEnum.TITLE_BAR);
         setBackgroundDrawableFromSD(main_bg, ImageEnum.MAIN_BG);
         setBackgroundDrawableFromSD(viewSelectAll, ImageEnum.HOME_BTN);
         setBackgroundDrawableFromSD(viewSelectType, ImageEnum.SEARCH_BTN);
     }
 
-
     private void initAd() {
-
         Observable.just(MyApplication.AIDLApi)
                 .map(new Function<AidlApi, List<AdBean>>() {
                     @Override
@@ -170,8 +197,6 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                     }
                 });
     }
-
-
 
     private void setGridAdapter(final AidlApi aidlApi, ProductCategory categorySelect) {
         if (productAdapter == null) {
@@ -252,8 +277,6 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
         productAdapter.setCategory(categorySelect);
     }
 
-    private CategoryPop categoryPop;
-
     private void initUI(final AidlApi aidlApi) {
         Observable.just(aidlApi)
                 .map(new Function<AidlApi, List<ProductCategory>>() {
@@ -298,7 +321,7 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                     }
 
                     private void showCategoryPop(CategoryPop popupWindow) {
-                        popupWindow.showAtLocation(findViewById(R.id.main_view), Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
+                        popupWindow.showAtLocation(findViewById(R.id.main_view), Gravity.RIGHT | Gravity.CENTER_VERTICAL, 0, 0);
                         setBackgroundAlpha(0.6f);
                         popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
                             @Override
@@ -355,11 +378,9 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
 
     }
 
-
-
     private void backAllFuture() {
         if (mBackAllSubscribe != null) {
-            if (!mBackAllSubscribe.isDisposed()){
+            if (!mBackAllSubscribe.isDisposed()) {
                 return;
             }
         }
@@ -375,7 +396,7 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
     }
 
     private void backAllCancel() {
-        if (mBackAllSubscribe!=null&&!mBackAllSubscribe.isDisposed()){
+        if (mBackAllSubscribe != null && !mBackAllSubscribe.isDisposed()) {
             mBackAllSubscribe.dispose();
         }
     }
@@ -468,7 +489,6 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
         }
     }
 
-    private int adIndex = 0;
     //adWaitingPeriod d秒后 播放广播
     private void startCountingAd() {
         if (mAdSubscribe != null) {

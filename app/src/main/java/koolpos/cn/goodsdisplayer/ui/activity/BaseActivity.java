@@ -20,6 +20,8 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
+import net.gtr.framework.app.activity.RxBaseActivity;
+
 import org.json.JSONObject;
 
 import java.io.File;
@@ -40,24 +42,29 @@ import io.reactivex.schedulers.Schedulers;
 import koolpos.cn.goodsdisplayer.MyApplication;
 import koolpos.cn.goodsdisplayer.constans.ImageEnum;
 import koolpos.cn.goodsdisplayer.rxjava.ActivityObserver;
-import koolpos.cn.goodsdisplayer.util.Device;
 import koolpos.cn.goodsdisplayer.util.Loger;
 
 /**
  * Created by Administrator on 2017/5/13.
  */
 
-public class BaseActivity extends AppCompatActivity {
+public class BaseActivity extends RxBaseActivity {
 
 
+    List<View> listNeedKill = new ArrayList<>();
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
     private Disposable bugSubscribe;
-
     private boolean fullSet = true;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (Build.MODEL.contains("kool")) {
+            fullSet = false;
+        }
+        setRequestedOrientation(ActivityInfo
+//     .SCREEN_ORIENTATION_LANDSCAPE);// 横屏
+        .SCREEN_ORIENTATION_PORTRAIT);//竖屏
         startBug();
     }
 
@@ -68,14 +75,13 @@ public class BaseActivity extends AppCompatActivity {
         killerImage();
     }
 
-    List<View> listNeedKill=new ArrayList<>();
     private void killerImage() {
-        if (listNeedKill.size()==0){
+        if (listNeedKill.size() == 0) {
             return;
         }
-        for (View view:listNeedKill){
-            if (view instanceof ImageView){
-                ((ImageView)view).setImageResource(0);
+        for (View view : listNeedKill) {
+            if (view instanceof ImageView) {
+                ((ImageView) view).setImageResource(0);
             }
             view.setBackgroundResource(0);
         }
@@ -110,7 +116,7 @@ public class BaseActivity extends AppCompatActivity {
                                             | View.SYSTEM_UI_FLAG_IMMERSIVE);
                             window.setStatusBarColor(Color.TRANSPARENT);
                             window.setNavigationBarColor(Color.TRANSPARENT);
-                        }else {
+                        } else {
                             window.getDecorView().setSystemUiVisibility(
                                     View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                                             | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION

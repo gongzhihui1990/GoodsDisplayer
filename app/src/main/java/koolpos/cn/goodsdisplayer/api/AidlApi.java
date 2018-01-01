@@ -1,13 +1,10 @@
 package koolpos.cn.goodsdisplayer.api;
 
 import android.annotation.TargetApi;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
 import android.os.RemoteException;
 import android.os.TransactionTooLargeException;
-import android.text.TextUtils;
+import android.support.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -24,10 +21,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.reactivex.Observable;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.functions.Function;
-import io.reactivex.functions.Predicate;
 import koolpos.cn.goodproviderservice.service.aidl.IGPService;
 import koolpos.cn.goodsdisplayer.MyApplication;
 import koolpos.cn.goodsdisplayer.constans.ImageEnum;
@@ -71,15 +64,16 @@ public class AidlApi {
         }
         return ptList;
     }
+
     public boolean isServerStateOk() throws Exception {
         JSONObject request = new JSONObject();
         request.put("action", "local/get/appState");
         AidlResponse response = proxyPost(request.toString());
-        if (response==null||response.getData()==null){
+        if (response == null || response.getData() == null) {
             return false;
         }
         JSONObject data = new JSONObject(response.getData());
-        if ("Ok".equals(data.optString("stateEnum"))){
+        if ("Ok".equals(data.optString("stateEnum"))) {
             return true;
         }
         return false;
@@ -131,6 +125,16 @@ public class AidlApi {
         return goodsList;
     }
 
+    private boolean isUnique(@NonNull ProductCategory category, @NonNull List<ProductCategory> categoriesUnique) {
+        for (ProductCategory unique : categoriesUnique) {
+            Loger.d(unique.getName() + "/" + category.getName());
+            if (unique.getName().equals(category.getName())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * @return
      * @throws Exception
@@ -139,21 +143,28 @@ public class AidlApi {
         JSONObject request = new JSONObject();
         request.put("action", "local/get/category");
         AidlResponse response = proxyPost(request.toString());
-        List<ProductCategory> categories = new Gson().fromJson(response.getData(),
+        final List<ProductCategory> categoriesSrc = new Gson().fromJson(response.getData(),
                 new TypeToken<List<ProductCategory>>() {
                 }.getType());
-        List<ProductCategory> warpedCategories =new ArrayList<>();
-        if (categories!=null&&categories.size()!=0){
+        List<ProductCategory> categoriesUnique = new ArrayList<>();
+        List<ProductCategory> warpedCategories = new ArrayList<>();
+        if (categoriesSrc != null && categoriesSrc.size() != 0) {
+            for (ProductCategory category : categoriesSrc) {
+                // 添加不重复的分类
+                if (isUnique(category, categoriesUnique)) {
+                    categoriesUnique.add(category);
+                }
+            }
             //添加‘全部’分类
-            String path =MyApplication.PATHJson.optString(ImageEnum.HOME_BTN.name());
-            Loger.d("path all:"+path);
-            ProductCategory categoryAll=new ProductCategory();
+            String path = MyApplication.PATHJson.optString(ImageEnum.HOME_BTN.name());
+            Loger.d("path all:" + path);
+            ProductCategory categoryAll = new ProductCategory();
             categoryAll.setCategoryId(-1);
             categoryAll.setName("全部");
             categoryAll.setIconUrl(path);
             categoryAll.setImageUrl(path);
             warpedCategories.add(categoryAll);
-            warpedCategories.addAll(categories);
+            warpedCategories.addAll(categoriesUnique);
         }
         return warpedCategories;
     }
@@ -182,12 +193,12 @@ public class AidlApi {
             }
         }
         Loger.d("AidlResponse file:" + responseFile);
-        String data =getResponseFromFile(responseFile);
+        String data = getResponseFromFile(responseFile);
         Loger.d("AidlResponse data:" + data);
         return new Gson().fromJson(data, AidlResponse.class);
     }
 
-     private String getJsonFileToString(String jsonFileName) throws IOException {
+    private String getJsonFileToString(String jsonFileName) throws IOException {
         File jsonFile = new File(jsonFileName);
         InputStream is = new FileInputStream(jsonFile.getAbsolutePath());
         String line; // 用来保存每行读取的内容
@@ -208,10 +219,10 @@ public class AidlApi {
         AidlResponse defError = new AidlResponse();
         String contentResponse = "";
         try {
-             contentResponse = getJsonFileToString(filePath);
-        }catch (Exception e){
+            contentResponse = getJsonFileToString(filePath);
+        } catch (Exception e) {
             e.printStackTrace();
-            defError.setMessage("请求解析失败:"+e.getMessage());
+            defError.setMessage("请求解析失败:" + e.getMessage());
             defError.setCode(-1);
             contentResponse = defError.toString();
         }

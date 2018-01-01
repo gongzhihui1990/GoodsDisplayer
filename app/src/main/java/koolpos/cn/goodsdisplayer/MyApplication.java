@@ -14,6 +14,8 @@ import android.widget.Toast;
 import com.squareup.leakcanary.LeakCanary;
 import com.squareup.leakcanary.RefWatcher;
 
+import net.gtr.framework.app.BaseApp;
+
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
@@ -33,7 +35,7 @@ import koolpos.cn.goodsdisplayer.util.Loger;
  * Created by Administrator on 2017/5/13.
  */
 
-public class MyApplication extends Application {
+public class MyApplication extends BaseApp {
 
     private static MyApplication instance;
     public static Bitmap CacheBitmap;

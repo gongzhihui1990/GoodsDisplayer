@@ -27,6 +27,7 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
+import koolpos.cn.goodsdisplayer.BuildConfig;
 import koolpos.cn.goodsdisplayer.MyApplication;
 import koolpos.cn.goodsdisplayer.R;
 import koolpos.cn.goodsdisplayer.api.AidlApi;
@@ -38,7 +39,6 @@ import koolpos.cn.goodsdisplayer.util.Loger;
 import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 import static android.Manifest.permission.ACCESS_WIFI_STATE;
 import static android.Manifest.permission.INTERNET;
-import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 /**
@@ -46,83 +46,39 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
  */
 
 public class SplashActivity extends BaseActivity {
+    /**
+     * Id to identity READ_CONTACTS permission request.
+     */
+    private static final int REQUEST_PERMISSIONS = 0;
     @BindView(R.id.tv_hint_common)
     TextView tv_hint_common;
-
+    @BindView(R.id.tv_version)
+    TextView tv_version;
+    int timeMs = 0;
+    boolean inRequestPermission = false;
     private boolean initFlag = false;
     BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Action.State_Ok.equals(intent.getAction())) {
-                initDataFromAIDL();
+                //initByOnCreate();
+                Loger.d("initApplication");
+                initApplication();
             }
         }
     };
-    int timeMs = 0;
 
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        registerReceiver(receiver, new IntentFilter(Action.State_Ok));
-        setContentView(R.layout.activity_splash);
-
-        Observable.timer(1, TimeUnit.SECONDS)
-                .map(new Function<Long, Long>() {
-                    @Override
-                    public Long apply(@io.reactivex.annotations.NonNull Long aLong) throws Exception {
-                        MyApplication.getInstance().initApp();
-                        return aLong;
-                    }
-                }).subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
-                .subscribe();
-        Observable.interval(0, 1, TimeUnit.SECONDS)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .map(new Function<Long, Integer>() {
-                    @Override
-                    public Integer apply(@io.reactivex.annotations.NonNull Long aLong) throws Exception {
-                        return 30;
-                    }
-                }).map(new Function<Integer, Integer>() {
-            @Override
-            public Integer apply(@io.reactivex.annotations.NonNull Integer duration) throws Exception {
-                int totalSeconds = duration;
-                int curSeconds = timeMs++;
-                int remainSeconds = totalSeconds - curSeconds;
-                return remainSeconds;
-            }
-        }).filter(new Predicate<Integer>() {
-            @Override
-            public boolean test(@io.reactivex.annotations.NonNull Integer remainSeconds) throws Exception {
-                if (remainSeconds >= 0) {
-                    return true;
-                }
-                return false;
-            }
-        }).subscribe(new Consumer<Integer>() {
-            @Override
-            public void accept(@io.reactivex.annotations.NonNull Integer remainSeconds) throws Exception {
-                Loger.e("remainSeconds:" + remainSeconds);
-                if (remainSeconds == 0) {
-                    if (MyApplication.AIDLApi == null) {
-                        finish();
-                        return;
-                    }
-                    initDataFromAIDL();
-                } else {
-                    tv_hint_common.setText("服务初始化中，请稍等" + remainSeconds + "...");
-                }
-
-            }
-        });
-    }
-
-    private void initDataFromAIDL() {
+    private void initApplication() {
         if (initFlag) {
             return;
         }
         initFlag = true;
+        if (goRequestPermission()) {
+            //need request permission,after that can do
+            Loger.d("need request permission,after that can do");
+            return;
+        }
+        Loger.d("permission get success");
         Observable<Boolean> ob1 = Observable.just(MyApplication.AIDLApi)
                 .map(new Function<AidlApi, JSONObject>() {
                     @Override
@@ -185,45 +141,139 @@ public class SplashActivity extends BaseActivity {
                 });
     }
 
+    private void initByOnCreate() {
+        if (goRequestPermission()) {
+            //need request permission,after that can do
+            Loger.d("need request permission,after that can do");
+            return;
+        }
+        Observable.timer(1, TimeUnit.SECONDS)
+                .map(new Function<Long, Long>() {
+                    @Override
+                    public Long apply(@io.reactivex.annotations.NonNull Long aLong) throws Exception {
+                        MyApplication.getInstance().initApp();
+                        return aLong;
+                    }
+                }).subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe();
+        Observable.interval(0, 1, TimeUnit.SECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .map(new Function<Long, Integer>() {
+                    @Override
+                    public Integer apply(@io.reactivex.annotations.NonNull Long aLong) throws Exception {
+                        return 45;
+                    }
+                }).map(new Function<Integer, Integer>() {
+            @Override
+            public Integer apply(@io.reactivex.annotations.NonNull Integer duration) throws Exception {
+                int totalSeconds = duration;
+                int curSeconds = timeMs++;
+                int remainSeconds = totalSeconds - curSeconds;
+                return remainSeconds;
+            }
+        }).filter(new Predicate<Integer>() {
+            @Override
+            public boolean test(@io.reactivex.annotations.NonNull Integer remainSeconds) throws Exception {
+                if (remainSeconds >= 0) {
+                    return true;
+                }
+                return false;
+            }
+        }).subscribe(new Consumer<Integer>() {
+            @Override
+            public void accept(@io.reactivex.annotations.NonNull Integer remainSeconds) throws Exception {
+                Loger.e("remainSeconds:" + remainSeconds);
+                if (remainSeconds == 0) {
+                    if (MyApplication.AIDLApi == null) {
+                        finish();
+                        return;
+                    }
+                    initApplication();
+                } else {
+                    tv_hint_common.setText("服务初始化中，请稍等" + remainSeconds + "...");
+                }
+
+            }
+        });
+    }
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        registerReceiver(receiver, new IntentFilter(Action.State_Ok));
+        setContentView(R.layout.activity_splash);
+        tv_version.setText(BuildConfig.Release_Info);
+        initByOnCreate();
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(receiver);
     }
 
-    /**
-     * Id to identity READ_CONTACTS permission request.
-     */
-    private static final int REQUEST_PERMISSIONS = 0;
+    @TargetApi(Build.VERSION_CODES.M)
+    private boolean goRequestPermission_SDK_M() {
+        final String[] permissions = {
+                INTERNET,
+                WRITE_EXTERNAL_STORAGE,
+                ACCESS_NETWORK_STATE,
+                ACCESS_WIFI_STATE,
+                /*READ_PHONE_STATE*/};
 
-    private boolean mayRequestInternet() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
+        boolean needRequest = false;
+        for (String permission : permissions) {
+            boolean needRequestTmp = checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED;
+            needRequest |= needRequestTmp;
+            Loger.d("need " + permission + ": " + needRequestTmp);
+            Loger.d("permissions: " + needRequest);
         }
-        if (checkSelfPermission(READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
-            return true;
+        if (!needRequest) {
+            return false;
         }
-        final String[] permissions = {INTERNET, WRITE_EXTERNAL_STORAGE, ACCESS_NETWORK_STATE, ACCESS_WIFI_STATE, READ_PHONE_STATE};
-        if (shouldShowRequestPermissionRationale(READ_PHONE_STATE)) {
+        Loger.d("needRequest permissions");
+
+        boolean shouldShowRequest = false;
+        for (String permission : permissions) {
+            if (shouldShowRequestPermissionRationale(permission)) {
+                shouldShowRequest = true;
+                break;
+            }
+        }
+        if (shouldShowRequest) {
+            Loger.d("shouldShowRequestPermissionRationale");
             Snackbar.make(tv_hint_common, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
                     .setAction(android.R.string.ok, new View.OnClickListener() {
                         @Override
                         @TargetApi(Build.VERSION_CODES.M)
                         public void onClick(View v) {
+                            Loger.d("requestPermissions");
                             requestPermissions(permissions, REQUEST_PERMISSIONS);
                         }
-                    });
+                    }).show();
         } else {
+            Loger.d("requestPermissions");
             requestPermissions(permissions, REQUEST_PERMISSIONS);
         }
-        return false;
+        return true;
+    }
+
+    private boolean goRequestPermission() {
+        if (inRequestPermission) {
+            return true;
+        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            Loger.d("checkSelfPermission success");
+            return false;
+        }
+        return goRequestPermission_SDK_M();
+
     }
 
     private void populateAutoComplete() {
-        Loger.d("populateAutoComplete " + mayRequestInternet());
-        if (!mayRequestInternet()) {
-            return;
-        }
+        Loger.d("populateAutoComplete " + goRequestPermission());
         toMainPage();
     }
 
@@ -233,9 +283,23 @@ public class SplashActivity extends BaseActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
+        Loger.d("onRequestPermissionsResult:" + permissions.length);
         if (requestCode == REQUEST_PERMISSIONS) {
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                populateAutoComplete();
+            inRequestPermission = false;
+            boolean grantsSuccess = true;
+            int i = 0;
+            Loger.d("grantsSuccess:" + grantsSuccess);
+            for (int grantResult : grantResults) {
+                boolean grantSuccess = grantResult == PackageManager.PERMISSION_GRANTED;
+                Loger.d(permissions[i] + ":" + grantSuccess);
+                grantsSuccess &= grantSuccess;
+                Loger.d("grantsSuccess:" + grantsSuccess);
+                i++;
+            }
+            if (grantsSuccess) {
+                initByOnCreate();
+            } else {
+                finish();
             }
         }
     }
