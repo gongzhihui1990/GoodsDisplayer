@@ -45,6 +45,8 @@
         </activity>
         <activity android:name=".ui.activity.ShowDetailActivity"
             android:theme="@style/FullscreenTransParentTheme"/>
+        <activity android:name=".ui.activity.ShowDetailPortActivity"
+            android:theme="@style/FullscreenTransParentTheme"/>
 
         <activity android:name=".ui.activity.AdVideoDisplayActivity"
             android:theme="@style/FullscreenTheme"/>

@@ -51,6 +51,7 @@ import koolpos.cn.goodsdisplayer.ui.adapter.ProductAdapter;
 import koolpos.cn.goodsdisplayer.ui.fragment.DisplayGoodGroupFragment;
 import koolpos.cn.goodsdisplayer.ui.widget.CategoryPop;
 import koolpos.cn.goodsdisplayer.ui.widget.GridSpacingItemDecoration;
+import koolpos.cn.goodsdisplayer.util.AndroidUtils;
 import koolpos.cn.goodsdisplayer.util.Loger;
 
 /**
@@ -112,7 +113,7 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                     public void onNext(Integer integer) {
                         super.onNext(integer);
                         if (integer > 0) {
-                            float alpha = Float.valueOf(integer) / fadeTime ;
+                            float alpha = Float.valueOf(integer) / fadeTime;
                             Loger.d("alpha=" + alpha * alpha);
                             tv_version.setAlpha(alpha * alpha);
                         }
@@ -267,7 +268,8 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
 
                                 }
                             });
-                    Intent intent = new Intent(getBaseContext(), ShowDetailActivity.class);
+                    Intent intent = new Intent(getBaseContext(),
+                            AndroidUtils.isScreenOriatationPortrait() ? ShowDetailPortActivity.class : ShowDetailActivity.class);
                     intent.putExtra(Product.class.getName(), product);
                     startActivityForResult(intent, showProduct);
 //                    Observable.just()

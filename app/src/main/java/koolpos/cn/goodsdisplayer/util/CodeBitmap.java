@@ -33,14 +33,15 @@ public class CodeBitmap {
 		return resMatrix;
 	}
 
+	private final static int rate =128;
 	public static Bitmap Create2DCode(String str)  {
 		//生成二维矩阵,编码时指定大小,不要生成了图片以后再进行缩放,这样会模糊导致识别失败
 		BitMatrix matrix = null;
 		try {
 			Loger.d("DENSITY:"+AndroidUtils.DENSITY);
 			matrix = new MultiFormatWriter().encode(str,
-					BarcodeFormat.QR_CODE,(int)(192*AndroidUtils.DENSITY),
-					(int)(192*AndroidUtils.DENSITY));
+					BarcodeFormat.QR_CODE,(int)(rate*AndroidUtils.DENSITY),
+					(int)(rate*AndroidUtils.DENSITY));
 			matrix = deleteWhite(matrix);//删除白边
 		} catch (WriterException e) {
 			e.printStackTrace();
