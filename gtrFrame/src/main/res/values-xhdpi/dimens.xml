@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2017. heisenberg.gong
+  -->
+
+<resources>
+    <!--dimens_x : y = 2 : 1 -->
+    <dimen name="dimens_1">0.5dp</dimen>
+    <dimen name="dimens_18">9dp</dimen>
+    <dimen name="dimens_20">10dp</dimen>
+    <dimen name="dimens_32">16dp</dimen>
+    <dimen name="dimens_40">20dp</dimen>
+    <dimen name="dimens_72">36dp</dimen>
+    <dimen name="dimens_32_ne">-16dp</dimen>
+    <dimen name="dimens_82_ne">-41dp</dimen>
+    <dimen name="dimens_96">48dp</dimen>
+    <dimen name="dimens_120">60dp</dimen>
+    <dimen name="dimens_144">72dp</dimen>
+    <dimen name="dimens_220">110dp</dimen>
+    <dimen name="dimens_swipe">153dp</dimen>
+    <dimen name="dimens_200">100dp</dimen>
+    <dimen name="dimens_288">144dp</dimen>
+    <dimen name="action_bar_size">56dp</dimen>
+    <dimen name="money">42dp</dimen>
+</resources>

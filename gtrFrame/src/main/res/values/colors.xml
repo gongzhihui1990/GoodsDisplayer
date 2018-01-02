@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2017. heisenberg.gong
+  -->
+
+<resources>
+    <color name="get_red">#C21D21</color>
+    <color name="get_red_dis">#55C21D21</color>
+
+    <color name="title_bg">#37363C</color>
+    <color name="black">#333333</color>
+    <color name="text_color_hint">#55333333</color>
+    <color name="white">#FFFFFF</color>
+    <color name="btn_green">#4FC780</color>
+    <color name="dark_gray_text">#3E3A39</color>
+    <color name="dialog_bg">#11050F</color>
+    <color name="gray">#9A9A9A</color>
+    <color name="gray_bg">#F2F2F2</color>
+    <color name="gray_text">#6C6F74</color>
+    <color name="gray_line">#E0E0E0</color>
+    <color name="orange">#ff9300</color>
+    <color name="orange_press">#F08C03</color>
+    <color name="green">#4FC780</color>
+    <color name="blue">#2390EB</color>
+    <color name="red">#FD7D70</color>
+
+    <color name="gray_line_bg">#D5D5D5</color>
+    <color name="green_bg">#00C752</color>
+
+    <color name="color_withdrawal">#50C881</color>
+    <color name="color_sign_in">#75A9FF</color>
+    <color name="color_balance">#55C3D4</color>
+    <color name="color_manager">#CE7EDF</color>
+    <color name="color_detail">#FF8584</color>
+    <color name="color_batch_settlement">#FFBD66</color>
+
+    <color name="color_shape_color">#727272</color>
+    <color name="color_version">#848484</color>
+    <color name="app_red_title">#C21D21</color>
+    <color name="app_red_title_disable">#55C21D21</color>
+
+    <color name="app_main_0">#9A9A9A</color>
+    <color name="app_main_1">#F26C60</color>
+    <color name="app_main_1_P">#66F26C60</color>
+    <color name="app_main_2">#E6517B</color>
+    <color name="app_main_2_P">#66E6517B</color>
+    <color name="app_main_3">#FFA200</color>
+    <color name="app_main_3_P">#66FFA200</color>
+    <color name="app_main_4">#3CAFE8</color>
+    <color name="app_main_4_P">#663CAFE8</color>
+    <color name="app_main_5">#50C3D4</color>
+    <color name="app_main_5_P">#6650C3D4</color>
+    <color name="app_main_6">#50C881</color>
+    <color name="app_main_6_P">#6650C881</color>
+    <color name="app_main_7">#FF8584</color>
+    <color name="app_main_7_P">#66FF8584</color>
+    <color name="app_main_7_1">#CE7EDF</color>
+    <color name="app_main_7_1_P">#66CE7EDF</color>
+    <color name="app_main_8">#FFBD66</color>
+    <color name="app_main_8_P">#66FFBD66</color>
+    <color name="app_main_8_1">#F9C10C</color>
+    <color name="app_main_8_1_P">#66F9C10C</color>
+    <color name="app_main_9">#36D7B6</color>
+    <color name="app_main_9_P">#6636D7B6</color>
+    <color name="app_main_9_1">#5C9BD1</color>
+    <color name="app_main_9_1_P">#665C9BD1</color>
+</resources>

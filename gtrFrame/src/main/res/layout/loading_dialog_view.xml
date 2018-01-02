@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2017. heisenberg.gong
+  -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/dialog_view"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/red_inverse_gtr"
+    android:minWidth="400dp"
+    android:orientation="vertical">
+
+
+    <TextView
+        android:id="@+id/title_tip"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_marginLeft="8dp"
+        android:gravity="center"
+        android:text="提示"
+        android:textColor="@color/get_red"
+        android:textSize="20sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/get_red" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:padding="32dp"
+            android:id="@+id/message_tip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="提示内容。。。"
+            android:textColor="@android:color/black"
+            android:textSize="18sp" />
+
+        <ProgressBar
+            style="@android:style/Widget.ProgressBar.Inverse"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+
+</LinearLayout>

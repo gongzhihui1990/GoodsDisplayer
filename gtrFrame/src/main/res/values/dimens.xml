@@ -1,0 +1,19 @@
+<!--
+  ~ Copyright (c) 2017. heisenberg.gong
+  -->
+
+<resources>
+
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="text_size_mini">10sp</dimen>
+    <dimen name="text_size_small">12sp</dimen>
+    <dimen name="text_size_middle">16sp</dimen>
+    <dimen name="text_size_big">20sp</dimen>
+    <dimen name="text_size_big_max">32sp</dimen>
+
+    <dimen name="text_small">12sp</dimen>
+    <dimen name="text_middle">16sp</dimen>
+    <dimen name="text_big">20sp</dimen>
+
+
+</resources>
