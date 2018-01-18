@@ -8,7 +8,7 @@ android {
         minSdkVersion 14
         targetSdkVersion 25
         versionCode 5
-        versionName "1.0.5"
+        versionName "1.0.6"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         //multiDexKeepProguard file("multidexKeep.pro")
 
@@ -27,7 +27,21 @@ android {
             storePassword 'android'
         }
     }
-
+    flavorDimensions "orientation"
+    productFlavors{
+        //横屏
+        land{
+            applicationId "koolpos.cn.goodsdisplayer.land"
+            versionNameSuffix ".land"
+            dimension "orientation"
+        }
+        //竖屏
+        port{
+            applicationId "koolpos.cn.goodsdisplayer.port"
+            versionNameSuffix ".port"
+            dimension "orientation"
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -55,13 +69,6 @@ android {
                 outputFileName = fileName
             }
         }
-        /*  applicationVariants.all { variant ->
-              variant.outputs.each { output ->
-                  def outputFile = output.outputFile
-                  def fileName = "创思Display_V${versionName}_@${releaseTime()}.apk"
-                  output.outputFile = new File(outputFile.parent, fileName)
-              }
-          }*/
     }
 }
 

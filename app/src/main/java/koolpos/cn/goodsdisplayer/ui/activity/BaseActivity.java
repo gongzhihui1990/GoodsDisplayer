@@ -10,7 +10,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
@@ -39,6 +38,7 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
+import koolpos.cn.goodsdisplayer.BuildConfig;
 import koolpos.cn.goodsdisplayer.MyApplication;
 import koolpos.cn.goodsdisplayer.constans.ImageEnum;
 import koolpos.cn.goodsdisplayer.rxjava.ActivityObserver;
@@ -62,9 +62,12 @@ public class BaseActivity extends RxBaseActivity {
         if (Build.MODEL.contains("kool")) {
             fullSet = false;
         }
-        setRequestedOrientation(ActivityInfo
-//     .SCREEN_ORIENTATION_LANDSCAPE);// 横屏
-        .SCREEN_ORIENTATION_PORTRAIT);//竖屏
+        //
+        if (BuildConfig.FLAVOR.equals("land")) {
+            setScreenLand();
+        }else {
+            setScreenPort();
+        }
         startBug();
     }
 
@@ -228,24 +231,21 @@ public class BaseActivity extends RxBaseActivity {
     }
 
 
-    private void setPortOrLand() {
-//        if (Device.isPAD()) {
-//            setLand();
-//        } else {
-//            setLand();
-//        }
-    }
 
-    private void setPort() {
+    /**
+     * 设置为竖屏
+     */
+    private void setScreenPort() {
         if (getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
     }
 
-    private void setLand() {
-        /**
-         * 设置为横屏
-         */
+    /**
+     * 设置为横屏
+     */
+    private void setScreenLand() {
+
         if (getRequestedOrientation() != ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
