@@ -137,8 +137,8 @@
                 <ImageView
                     android:padding="@dimen/dimens_10"
                     android:id="@+id/iv_pay_code"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="@dimen/dimens_220"
+                    android:layout_height="@dimen/dimens_220"
                     android:background="@android:color/white"
                  />
 

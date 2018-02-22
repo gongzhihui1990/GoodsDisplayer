@@ -36,7 +36,9 @@ import koolpos.cn.goodsdisplayer.util.Loger;
 import koolpos.cn.goodsdisplayer.util.ViewUtil;
 
 /**
- * Created by caroline on 2017/5/30.
+ *
+ * @author caroline
+ * @date 2017/5/30
  */
 
 public class ShowDetailActivity extends BaseActivity {
@@ -57,13 +59,13 @@ public class ShowDetailActivity extends BaseActivity {
     @BindView(R.id.back_area_2)
     View back_area_2;
     @BindView(R.id.iv_pay_code)
-    ImageView iv_pay_code;
+    ImageView ivPayCode;
     @BindView(R.id.good_price)
-    TextView good_price;
+    TextView goodPrice;
     @BindView(R.id.good_description)
-    TextView good_description;
+    TextView goodDescription;
     @BindView(R.id.iv_pay_code_ll)
-    View iv_pay_code_ll;
+    View ivPayCodeLl;
     @BindView(R.id.iv_bar_cat)
     View iv_bar_cat;
     @BindView(R.id.tv_hint_bar)
@@ -180,7 +182,7 @@ public class ShowDetailActivity extends BaseActivity {
 
     private void showQrCode(ImageView imageView, String url) {
         if (TextUtils.isEmpty(url)) {
-            iv_pay_code_ll.setVisibility(View.INVISIBLE);
+            ivPayCodeLl.setVisibility(View.INVISIBLE);
             iv_bar_cat.setVisibility(View.INVISIBLE);
             tv_hint_bar.setVisibility(View.INVISIBLE);
             return;
@@ -190,16 +192,16 @@ public class ShowDetailActivity extends BaseActivity {
     }
 
     private void renderView(Product product) {
-        showQrCode(iv_pay_code, product.getQrCodeUrl());
+        showQrCode(ivPayCode, product.getQrCodeUrl());
         rightView.setVisibility(View.INVISIBLE);
         leftView.setVisibility(View.INVISIBLE);
         tvGoodName.setText(product.getTitle());
-        good_price.setText(product.getPrice());
-        good_description.setText(product.getTitle());
+        goodPrice.setText(product.getPrice());
+        goodDescription.setText(product.getTitle());
 
-        good_description.setTypeface(MyApplication.FZ_GBK);
+        goodDescription.setTypeface(MyApplication.FZ_GBK);
         tvGoodName.setTypeface(MyApplication.FZ_GBK);
-        good_price.setTypeface(MyApplication.FZ_GBK);
+        goodPrice.setTypeface(MyApplication.FZ_GBK);
         tv_hint_bar.setTypeface(MyApplication.FZ_GBK);
 //        Glide.with(this)
 //                .load(product.getPicUrl())

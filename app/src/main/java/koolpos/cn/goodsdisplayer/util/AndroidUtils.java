@@ -14,6 +14,7 @@ import android.graphics.Bitmap.Config;
 import android.graphics.drawable.AnimationDrawable;
 import android.media.Image;
 import android.provider.Settings;
+import android.support.annotation.Nullable;
 import android.widget.ImageView;
 
 import com.bumptech.glide.DrawableRequestBuilder;
@@ -36,7 +37,10 @@ public class AndroidUtils {
 	public static void loadImageAnim(String url,ImageView imageView){
 		loadImage(url,imageView,true);
 	}
-	public static void loadImage(String url,ImageView imageView,boolean withAnim){
+	public static void loadImage(@Nullable String url, ImageView imageView, boolean withAnim){
+		if (url==null){
+			Loger.e("loadImage url is null");
+		}
 		DrawableRequestBuilder<String> request;
 		if (url.startsWith("http")||url.startsWith("/")){
 			Loger.i("from url "+ url);

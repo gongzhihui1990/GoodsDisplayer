@@ -10,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.Window;
@@ -59,6 +60,7 @@ public class BaseActivity extends RxBaseActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Loger.d("onCreate "+this.getClass().getSimpleName());
         if (Build.MODEL.contains("kool")) {
             fullSet = false;
         }
@@ -73,6 +75,7 @@ public class BaseActivity extends RxBaseActivity {
 
     @Override
     protected void onDestroy() {
+        Loger.d("onDestroy "+this.getClass().getSimpleName());
         super.onDestroy();
         stopBug();
         killerImage();
@@ -171,8 +174,12 @@ public class BaseActivity extends RxBaseActivity {
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new ActivityObserver<File>(BaseActivity.this) {
+                    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
                     @Override
                     public void onNext(File file) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 && BaseActivity.this.isDestroyed()){
+                            return;
+                        }
                         Glide.with(BaseActivity.this)
                                 .load(file)
                                 .diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -265,6 +272,7 @@ public class BaseActivity extends RxBaseActivity {
      *
      * @param disposable
      */
+    @Override
     public void addDisposable(Disposable disposable) {
         compositeDisposable.add(disposable);
     }
@@ -274,6 +282,7 @@ public class BaseActivity extends RxBaseActivity {
      *
      * @param disposable
      */
+    @Override
     public void removeDisposable(Disposable disposable) {
         compositeDisposable.remove(disposable);
     }

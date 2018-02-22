@@ -105,7 +105,13 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fullscreen);
         tv_version.setText(BuildConfig.Release_Info);
-
+        tv_version.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                finish();
+                return false;
+            }
+        });
         final int fadeTime = 30;
         RxHelper.bindOnUI(RxHelper.countdown(fadeTime, 1, TimeUnit.SECONDS),
                 new ProgressObserverImplementation<Integer>(MainActivity.this) {
@@ -122,7 +128,6 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                     @Override
                     public void onComplete() {
                         super.onComplete();
-                        tv_version.setVisibility(View.GONE);
                     }
                 }.setShow(false));
         Glide.with(MyApplication.getContext()).resumeRequests();
@@ -139,6 +144,8 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                         stop();
                         reStartDisplay();
                         startCountingAd();
+                        break;
+                    default:
                         break;
                 }
                 return false;
@@ -171,10 +178,26 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
     }
 
     private void initSpecialUI() {
-        setImageDrawableFromSD(imageTitleBar, ImageEnum.TITLE_BAR);
-        setBackgroundDrawableFromSD(main_bg, ImageEnum.MAIN_BG);
-        setBackgroundDrawableFromSD(viewSelectAll, ImageEnum.HOME_BTN);
-        setBackgroundDrawableFromSD(viewSelectType, ImageEnum.SEARCH_BTN);
+        try {
+            setImageDrawableFromSD(imageTitleBar, ImageEnum.TITLE_BAR);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            setBackgroundDrawableFromSD(main_bg, ImageEnum.MAIN_BG);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            setBackgroundDrawableFromSD(viewSelectAll, ImageEnum.HOME_BTN);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            setBackgroundDrawableFromSD(viewSelectType, ImageEnum.SEARCH_BTN);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void initAd() {
@@ -323,7 +346,7 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                     }
 
                     private void showCategoryPop(CategoryPop popupWindow) {
-                        popupWindow.showAtLocation(findViewById(R.id.main_view), Gravity.RIGHT | Gravity.CENTER_VERTICAL, 0, 0);
+                        popupWindow.showAtLocation(findViewById(R.id.main_view), Gravity.BOTTOM | Gravity.CENTER_VERTICAL, 0, 0);
                         setBackgroundAlpha(0.6f);
                         popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
                             @Override
