@@ -53,6 +53,7 @@ import koolpos.cn.goodsdisplayer.ui.widget.CategoryPop;
 import koolpos.cn.goodsdisplayer.ui.widget.GridSpacingItemDecoration;
 import koolpos.cn.goodsdisplayer.util.AndroidUtils;
 import koolpos.cn.goodsdisplayer.util.Loger;
+import koolpos.cn.goodsdisplayer.util.SimpleToast;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -100,36 +101,42 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
         }
     };
 
+    private int quitIndex = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fullscreen);
-        tv_version.setText(BuildConfig.Release_Info);
-        tv_version.setOnLongClickListener(new View.OnLongClickListener() {
+        imageTitleBar.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onLongClick(View v) {
-                finish();
-                return false;
+            public void onClick(View v) {
+                quitIndex++;
+                if (quitIndex == 5) {
+                    SimpleToast.toast(BuildConfig.Release_Info);
+                    finish();
+                }
+                if (quitIndex == 10) {
+                    finish();
+                }
             }
         });
         final int fadeTime = 30;
-        RxHelper.bindOnUI(RxHelper.countdown(fadeTime, 1, TimeUnit.SECONDS),
-                new ProgressObserverImplementation<Integer>(MainActivity.this) {
-                    @Override
-                    public void onNext(Integer integer) {
-                        super.onNext(integer);
-                        if (integer > 0) {
-                            float alpha = Float.valueOf(integer) / fadeTime;
-                            Loger.d("alpha=" + alpha * alpha);
-                            tv_version.setAlpha(alpha * alpha);
-                        }
-                    }
+        RxHelper.bindOnUI(RxHelper.countdown(fadeTime, 1, TimeUnit.SECONDS), new ProgressObserverImplementation<Integer>(MainActivity.this) {
+            @Override
+            public void onNext(Integer integer) {
+                super.onNext(integer);
+                if (integer > 0) {
+                    float alpha = Float.valueOf(integer) / fadeTime;
+                    Loger.d("alpha=" + alpha * alpha);
+                    tv_version.setAlpha(alpha * alpha);
+                }
+            }
 
-                    @Override
-                    public void onComplete() {
-                        super.onComplete();
-                    }
-                }.setShow(false));
+            @Override
+            public void onComplete() {
+                super.onComplete();
+            }
+        }.setShow(false));
         Glide.with(MyApplication.getContext()).resumeRequests();
         gridContentView.setLayoutManager(new LinearLayoutManager(getBaseContext(), LinearLayoutManager.HORIZONTAL, false));
         gridContentView.setOnTouchListener(new View.OnTouchListener() {
@@ -201,25 +208,22 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
     }
 
     private void initAd() {
-        Observable.just(MyApplication.AIDLApi)
-                .map(new Function<AidlApi, List<AdBean>>() {
-                    @Override
-                    public List<AdBean> apply(@NonNull AidlApi aidlApi) throws Exception {
-                        return aidlApi.getAdList();
-                    }
-                }).filter(new Predicate<List<AdBean>>() {
+        Observable.just(MyApplication.AIDLApi).map(new Function<AidlApi, List<AdBean>>() {
+            @Override
+            public List<AdBean> apply(@NonNull AidlApi aidlApi) throws Exception {
+                return aidlApi.getAdList();
+            }
+        }).filter(new Predicate<List<AdBean>>() {
             @Override
             public boolean test(@NonNull List<AdBean> adBeen) throws Exception {
                 return adBeen != null && adBeen.size() > 0;
             }
-        }).observeOn(Schedulers.io())
-                .subscribeOn(Schedulers.io())
-                .subscribe(new ActivityObserver<List<AdBean>>(MainActivity.this) {
-                    @Override
-                    public void onNext(List<AdBean> adBeans) {
-                        adBeanList.addAll(adBeans);
-                    }
-                });
+        }).observeOn(Schedulers.io()).subscribeOn(Schedulers.io()).subscribe(new ActivityObserver<List<AdBean>>(MainActivity.this) {
+            @Override
+            public void onNext(List<AdBean> adBeans) {
+                adBeanList.addAll(adBeans);
+            }
+        });
     }
 
     private void setGridAdapter(final AidlApi aidlApi, ProductCategory categorySelect) {
@@ -238,9 +242,7 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                         return;
                     } else {
                         isBlock = true;
-                        Observable.timer(1000, TimeUnit.MILLISECONDS)
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(Schedulers.io()).subscribe(new Consumer<Long>() {
+                        Observable.timer(1000, TimeUnit.MILLISECONDS).subscribeOn(Schedulers.io()).observeOn(Schedulers.io()).subscribe(new Consumer<Long>() {
                             @Override
                             public void accept(@NonNull Long aLong) throws Exception {
                                 isBlock = false;
@@ -257,42 +259,37 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                     view.draw(canvas);
                     MyApplication.CacheBitmap = cacheBmp;
                     Loger.i("背景生成ok");
-                    Observable.just(MyApplication.CacheBitmap)
-                            .delay(200, TimeUnit.MILLISECONDS)
-                            .map(new Function<Bitmap, Intent>() {
-                                @Override
-                                public Intent apply(@NonNull Bitmap bitmap) throws Exception {
-                                    Intent intent = new Intent("CacheBitmapOk");
-                                    intent.putExtra(Product.class.getName(), product);
-                                    Loger.i("背景生成intent");
-                                    return intent;
-                                }
-                            }).subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(new Observer<Intent>() {
-                                @Override
-                                public void onSubscribe(Disposable d) {
+                    Observable.just(MyApplication.CacheBitmap).delay(200, TimeUnit.MILLISECONDS).map(new Function<Bitmap, Intent>() {
+                        @Override
+                        public Intent apply(@NonNull Bitmap bitmap) throws Exception {
+                            Intent intent = new Intent("CacheBitmapOk");
+                            intent.putExtra(Product.class.getName(), product);
+                            Loger.i("背景生成intent");
+                            return intent;
+                        }
+                    }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<Intent>() {
+                        @Override
+                        public void onSubscribe(Disposable d) {
 
-                                }
+                        }
 
-                                @Override
-                                public void onNext(Intent intent) {
-                                    Loger.i("背景生成发射");
-                                    MyApplication.getContext().sendBroadcast(intent);
-                                }
+                        @Override
+                        public void onNext(Intent intent) {
+                            Loger.i("背景生成发射");
+                            MyApplication.getContext().sendBroadcast(intent);
+                        }
 
-                                @Override
-                                public void onError(Throwable e) {
-                                    e.printStackTrace();
-                                }
+                        @Override
+                        public void onError(Throwable e) {
+                            e.printStackTrace();
+                        }
 
-                                @Override
-                                public void onComplete() {
+                        @Override
+                        public void onComplete() {
 
-                                }
-                            });
-                    Intent intent = new Intent(getBaseContext(),
-                            AndroidUtils.isScreenOriatationPortrait() ? ShowDetailPortActivity.class : ShowDetailActivity.class);
+                        }
+                    });
+                    Intent intent = new Intent(getBaseContext(), AndroidUtils.isScreenOriatationPortrait() ? ShowDetailPortActivity.class : ShowDetailActivity.class);
                     intent.putExtra(Product.class.getName(), product);
                     startActivityForResult(intent, showProduct);
 //                    Observable.just()
@@ -303,13 +300,12 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
     }
 
     private void initUI(final AidlApi aidlApi) {
-        Observable.just(aidlApi)
-                .map(new Function<AidlApi, List<ProductCategory>>() {
-                    @Override
-                    public List<ProductCategory> apply(@NonNull AidlApi aidlApi) throws Exception {
-                        return aidlApi.getCategoryList();
-                    }
-                }).map(new Function<List<ProductCategory>, CategoryPop>() {
+        Observable.just(aidlApi).map(new Function<AidlApi, List<ProductCategory>>() {
+            @Override
+            public List<ProductCategory> apply(@NonNull AidlApi aidlApi) throws Exception {
+                return aidlApi.getCategoryList();
+            }
+        }).map(new Function<List<ProductCategory>, CategoryPop>() {
             @Override
             public CategoryPop apply(@NonNull List<ProductCategory> productCategories) throws Exception {
                 CategoryPop.OnSPUSelectedListener spuSelectedListener = new CategoryPop.OnSPUSelectedListener() {
@@ -318,16 +314,13 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                         setGridAdapter(aidlApi, categorySelect);
                     }
                 };
-                Observable.just(productCategories.get(0))
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Consumer<ProductCategory>() {
-                            @Override
-                            public void accept(@NonNull ProductCategory category) throws Exception {
-                                setGridAdapter(aidlApi, category);
-                                startCountingAd();
-                            }
-                        });
+                Observable.just(productCategories.get(0)).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Consumer<ProductCategory>() {
+                    @Override
+                    public void accept(@NonNull ProductCategory category) throws Exception {
+                        setGridAdapter(aidlApi, category);
+                        startCountingAd();
+                    }
+                });
                 categoryPop = new CategoryPop(getBaseContext(), productCategories, spuSelectedListener);
                 return categoryPop;
             }
@@ -363,21 +356,19 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                     }
                 };
             }
-        }).observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(new ActivityObserver<View.OnClickListener>(MainActivity.this) {
+        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(new ActivityObserver<View.OnClickListener>(MainActivity.this) {
+            @Override
+            public void onNext(final View.OnClickListener onClickListener) {
+                viewSelectType.setOnClickListener(onClickListener);
+                viewSelectAll.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onNext(final View.OnClickListener onClickListener) {
-                        viewSelectType.setOnClickListener(onClickListener);
-                        viewSelectAll.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                //设置为全部
-                                categoryPop.selectAll();
-                            }
-                        });
+                    public void onClick(View v) {
+                        //设置为全部
+                        categoryPop.selectAll();
                     }
                 });
+            }
+        });
     }
 
     @Override
@@ -409,15 +400,12 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
                 return;
             }
         }
-        mBackAllSubscribe = Observable.timer(reSetAllPeriod, TimeUnit.SECONDS)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<Long>() {
-                    @Override
-                    public void accept(@NonNull Long aLong) throws Exception {
-                        categoryPop.selectAll();
-                    }
-                });
+        mBackAllSubscribe = Observable.timer(reSetAllPeriod, TimeUnit.SECONDS).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Consumer<Long>() {
+            @Override
+            public void accept(@NonNull Long aLong) throws Exception {
+                categoryPop.selectAll();
+            }
+        });
     }
 
     private void backAllCancel() {
@@ -431,34 +419,30 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
         if (mRoundSubscribe != null) {
             mRoundSubscribe.dispose();
         }
-        mRoundSubscribe = Observable.interval(startPeriod, speedPeriod, TimeUnit.MILLISECONDS)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(new Consumer<Long>() {
-                    @Override
-                    public void accept(@NonNull Long aLong) throws Exception {
+        mRoundSubscribe = Observable.interval(startPeriod, speedPeriod, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(new Consumer<Long>() {
+            @Override
+            public void accept(@NonNull Long aLong) throws Exception {
 
-                        if (!gridContentView.canScrollHorizontally(-1)
-                                && !gridContentView.canScrollHorizontally(1)) {
-                            backAllFuture();
-                        } else {
-                            backAllCancel();
-                        }
-                        if (inverse) {
-                            if (gridContentView.canScrollHorizontally(-1)) {
-                                gridContentView.scrollBy(-1, 0);
-                            } else {
-                                inverse = false;
-                            }
-                        } else {
-                            if (gridContentView.canScrollHorizontally(1)) {
-                                gridContentView.scrollBy(1, 0);
-                            } else {
-                                inverse = true;
-                            }
-                        }
+                if (!gridContentView.canScrollHorizontally(-1) && !gridContentView.canScrollHorizontally(1)) {
+                    backAllFuture();
+                } else {
+                    backAllCancel();
+                }
+                if (inverse) {
+                    if (gridContentView.canScrollHorizontally(-1)) {
+                        gridContentView.scrollBy(-1, 0);
+                    } else {
+                        inverse = false;
                     }
-                });
+                } else {
+                    if (gridContentView.canScrollHorizontally(1)) {
+                        gridContentView.scrollBy(1, 0);
+                    } else {
+                        inverse = true;
+                    }
+                }
+            }
+        });
     }
 
     //重新轮播
@@ -466,33 +450,29 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
         if (mRoundSubscribe != null) {
             mRoundSubscribe.dispose();
         }
-        mRoundSubscribe = Observable.interval(replayPeriod, speedPeriod, TimeUnit.MILLISECONDS)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(new Consumer<Long>() {
-                    @Override
-                    public void accept(@NonNull Long aLong) throws Exception {
-                        if (!gridContentView.canScrollHorizontally(-1)
-                                && !gridContentView.canScrollHorizontally(1)) {
-                            backAllFuture();
-                        } else {
-                            backAllCancel();
-                        }
-                        if (inverse) {
-                            if (gridContentView.canScrollHorizontally(-1)) {
-                                gridContentView.scrollBy(-1, 0);
-                            } else {
-                                inverse = false;
-                            }
-                        } else {
-                            if (gridContentView.canScrollHorizontally(1)) {
-                                gridContentView.scrollBy(1, 0);
-                            } else {
-                                inverse = true;
-                            }
-                        }
+        mRoundSubscribe = Observable.interval(replayPeriod, speedPeriod, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(new Consumer<Long>() {
+            @Override
+            public void accept(@NonNull Long aLong) throws Exception {
+                if (!gridContentView.canScrollHorizontally(-1) && !gridContentView.canScrollHorizontally(1)) {
+                    backAllFuture();
+                } else {
+                    backAllCancel();
+                }
+                if (inverse) {
+                    if (gridContentView.canScrollHorizontally(-1)) {
+                        gridContentView.scrollBy(-1, 0);
+                    } else {
+                        inverse = false;
                     }
-                });
+                } else {
+                    if (gridContentView.canScrollHorizontally(1)) {
+                        gridContentView.scrollBy(1, 0);
+                    } else {
+                        inverse = true;
+                    }
+                }
+            }
+        });
     }
 
     //结束、暂停轮播
@@ -504,6 +484,7 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
     protected void onResume() {
         super.onResume();
         startCountingAd();
+        quitIndex = 0;
     }
 
     @Override
@@ -519,32 +500,29 @@ public class MainActivity extends BaseActivity implements DisplayGoodGroupFragme
         if (mAdSubscribe != null) {
             mAdSubscribe.dispose();
         }
-        mAdSubscribe = Observable.timer(adWaitingPeriod, TimeUnit.SECONDS)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(new Consumer<Long>() {
-                    @Override
-                    public void accept(@NonNull Long aLong) throws Exception {
-                        adIndex++;
-                        if (adBeanList != null && adBeanList.size() != 0) {
-                            int size = adBeanList.size();
-                            int pos = adIndex % size;
-                            AdBean adBean = adBeanList.get(pos);
-                            if (adBean.getResourType() != null) {
-                                switch (adBean.getResourType()) {
-                                    case "Image":
-                                        Intent intent = new Intent(getBaseContext(), AdImageDisplayActivity.class);
-                                        intent.putExtra(AdBean.class.getName(), adBean);
-                                        startActivityForResult(intent, showAd);
-                                        break;
-                                }
-                            }
-                        } else {
-                            Loger.d("play- null");
+        mAdSubscribe = Observable.timer(adWaitingPeriod, TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(new Consumer<Long>() {
+            @Override
+            public void accept(@NonNull Long aLong) throws Exception {
+                adIndex++;
+                if (adBeanList != null && adBeanList.size() != 0) {
+                    int size = adBeanList.size();
+                    int pos = adIndex % size;
+                    AdBean adBean = adBeanList.get(pos);
+                    if (adBean.getResourType() != null) {
+                        switch (adBean.getResourType()) {
+                            case "Image":
+                                Intent intent = new Intent(getBaseContext(), AdImageDisplayActivity.class);
+                                intent.putExtra(AdBean.class.getName(), adBean);
+                                startActivityForResult(intent, showAd);
+                                break;
                         }
-                        mAdSubscribe.dispose();
                     }
-                });
+                } else {
+                    Loger.d("play- null");
+                }
+                mAdSubscribe.dispose();
+            }
+        });
     }
 
     @Override

@@ -152,7 +152,10 @@ public class AidlApi {
             for (ProductCategory category : categoriesSrc) {
                 // 添加不重复的分类
                 if (isUnique(category, categoriesUnique)) {
-                    categoriesUnique.add(category);
+                    //special == true 才显示
+                    if (category.getIsSpecial()){
+                        categoriesUnique.add(category);
+                    }
                 }
             }
             //添加‘全部’分类
@@ -177,6 +180,7 @@ public class AidlApi {
         List<Product> goodsList = new Gson().fromJson(response.getData(),
                 new TypeToken<List<Product>>() {
                 }.getType());
+        Loger.d("goodsList:"+goodsList.size());
         return goodsList;
     }
 

@@ -40,6 +40,7 @@ public class AndroidUtils {
 	public static void loadImage(@Nullable String url, ImageView imageView, boolean withAnim){
 		if (url==null){
 			Loger.e("loadImage url is null");
+			return;
 		}
 		DrawableRequestBuilder<String> request;
 		if (url.startsWith("http")||url.startsWith("/")){

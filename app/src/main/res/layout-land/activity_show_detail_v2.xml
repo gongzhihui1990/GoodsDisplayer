@@ -1,19 +1,35 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg_detial"
     tools:context="koolpos.cn.goodsdisplayer.ui.activity.ShowDetailActivity">
-    <!--android:background="@color/bg_detial"-->
 
     <ImageView
         android:id="@+id/iv_bg"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <android.support.constraint.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.25" />
+
+    <android.support.constraint.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.75" />
 
     <LinearLayout
-        android:layout_alignParentTop="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal">
@@ -39,36 +55,38 @@
         <RelativeLayout
             android:id="@+id/rl_left"
             android:layout_width="0dp"
-            android:layout_weight="1.5"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_weight="1.5">
 
             <ImageView
-                android:layout_marginTop="@dimen/dimens_220"
                 android:id="@+id/good_img"
-                android:layout_above="@+id/v_base"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:layout_above="@+id/v_base"
+                android:layout_marginTop="@dimen/dimens_220" />
+
             <View
                 android:id="@+id/v_base"
-                android:layout_above="@+id/ll_left"
-                android:layout_centerHorizontal="true"
                 android:layout_width="1dp"
-                android:layout_height="1dp"/>
+                android:layout_height="1dp"
+                android:layout_above="@+id/ll_left"
+                android:layout_centerHorizontal="true" />
+
             <LinearLayout
-                android:layout_alignParentBottom="true"
-                android:layout_marginBottom="@dimen/dimens_220"
                 android:id="@+id/ll_left"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="@dimen/dimens_220"
                 android:gravity="center"
                 android:orientation="vertical">
 
                 <TextView
-                    android:maxLength="10"
-                    android:maxLines="1"
                     android:id="@+id/good_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:maxLength="10"
+                    android:maxLines="1"
                     android:textSize="@dimen/middle_text_size" />
 
                 <TextView
@@ -116,45 +134,45 @@
             <!--  android:layout_width="@dimen/dimens_220"
               android:layout_height="@dimen/dimens_220"-->
             <ImageView
-                android:layout_alignRight="@+id/iv_pay_code_ll"
-                android:layout_alignLeft="@+id/iv_pay_code_ll"
-                android:layout_above="@+id/iv_pay_code_ll"
                 android:id="@+id/iv_bar_cat"
-                android:scaleType="centerInside"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@mipmap/bar_cat"
-                />
+                android:layout_above="@+id/iv_pay_code_ll"
+                android:layout_alignLeft="@+id/iv_pay_code_ll"
+                android:layout_alignRight="@+id/iv_pay_code_ll"
+                android:scaleType="centerInside"
+                android:src="@mipmap/bar_cat" />
+
             <FrameLayout
                 android:id="@+id/iv_pay_code_ll"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
-                android:padding="2dp"
                 android:layout_below="@+id/good_description"
-                android:background="@android:color/black">
+                android:background="@android:color/black"
+                android:padding="2dp">
 
                 <ImageView
-                    android:padding="@dimen/dimens_10"
                     android:id="@+id/iv_pay_code"
                     android:layout_width="@dimen/dimens_220"
                     android:layout_height="@dimen/dimens_220"
                     android:background="@android:color/white"
-                 />
+                    android:padding="@dimen/dimens_10" />
 
             </FrameLayout>
+
             <TextView
                 android:id="@+id/tv_hint_bar"
-                android:padding="@dimen/dimens_10"
-                android:text="打开微信扫一扫"
-                android:gravity="center"
-                android:textColor="@android:color/black"
-                android:textSize="12sp"
-                android:layout_below="@+id/iv_pay_code_ll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_alignLeft="@+id/iv_pay_code_ll"
                 android:layout_alignRight="@+id/iv_pay_code_ll"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_below="@+id/iv_pay_code_ll"
+                android:gravity="center"
+                android:padding="@dimen/dimens_10"
+                android:text="打开微信扫一扫"
+                android:textColor="@android:color/black"
+                android:textSize="12sp" />
 
             <View
                 android:id="@+id/lineShort"
@@ -178,10 +196,10 @@
         <View
             android:id="@+id/back_area_2"
             android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_weight="1">
 
         </View>
     </LinearLayout>
 
-</RelativeLayout>
+</android.support.constraint.ConstraintLayout>

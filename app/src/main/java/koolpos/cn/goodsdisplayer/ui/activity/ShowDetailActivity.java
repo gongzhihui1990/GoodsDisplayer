@@ -67,7 +67,7 @@ public class ShowDetailActivity extends BaseActivity {
     @BindView(R.id.iv_pay_code_ll)
     View ivPayCodeLl;
     @BindView(R.id.iv_bar_cat)
-    View iv_bar_cat;
+    ImageView iv_bar_cat;
     @BindView(R.id.tv_hint_bar)
     TextView tv_hint_bar;
     BroadcastReceiver cacheBitmapOkReceiver = new BroadcastReceiver() {

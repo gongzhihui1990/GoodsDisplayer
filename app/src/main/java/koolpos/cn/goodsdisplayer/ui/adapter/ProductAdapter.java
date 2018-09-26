@@ -9,7 +9,6 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -35,89 +34,13 @@ import koolpos.cn.goodsdisplayer.util.Loger;
  */
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ItemViewHolder> implements CategoryManger {
+    private final static int TYPE_ALL = 2;
+    private final int GroupSize = AndroidUtils.isScreenOriatationPortrait() ? 15 : 10;
+    SkuDisplayDetailCall call;
     private boolean fillMode = true;//填满格子
     private Product[] fillModeItems;
-
-    class ItemViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.item_a_big)
-        View ab;
-        @BindView(R.id.item_a_small_1)
-        View a1;
-        @BindView(R.id.item_a_small_2)
-        View a2;
-        @BindView(R.id.item_a_small_3)
-        View a3;
-        @BindView(R.id.item_a_small_4)
-        View a4;
-
-        @BindView(R.id.item_b_big)
-        View bb;
-        @BindView(R.id.item_b_small_1)
-        View b1;
-        @BindView(R.id.item_b_small_2)
-        View b2;
-        @BindView(R.id.item_b_small_3)
-        View b3;
-        @BindView(R.id.item_b_small_4)
-        View b4;
-
-        @BindView(R.id.item_c_big)
-        View cb;
-        @BindView(R.id.item_c_small_1)
-        View c1;
-        @BindView(R.id.item_c_small_2)
-        View c2;
-        @BindView(R.id.item_c_small_3)
-        View c3;
-        @BindView(R.id.item_c_small_4)
-        View c4;
-        public ItemViewHolder(final View itemView) {
-            super(itemView);
-            ButterKnife.bind(this, itemView);
-            Observable.just(itemView)
-                    .map(new Function<View, Integer>() {
-                        @Override
-                        public Integer apply(@NonNull View view) throws Exception {
-                            int width = view.getHeight();
-                            if (AndroidUtils.isScreenOriatationPortrait()){
-                                width = width*2/3;
-                            }
-                            return width;
-                        }
-                    }).subscribeOn(AndroidSchedulers.mainThread())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Observer<Integer>() {
-                        @Override
-                        public void onSubscribe(Disposable d) {
-
-                        }
-
-                        @Override
-                        public void onNext(Integer width) {
-                            ViewGroup.LayoutParams lp = itemView.getLayoutParams();
-                            lp.width = width;
-                            itemView.setLayoutParams(lp);
-                        }
-
-                        @Override
-                        public void onError(Throwable e) {
-
-                        }
-
-                        @Override
-                        public void onComplete() {
-
-                        }
-                    });
-        }
-    }
-
     private List<Product[]> goodGroups = new ArrayList<>();
-
-    private final int GroupSize = AndroidUtils.isScreenOriatationPortrait() ? 15 : 10;
-
     private AidlApi aidlApi;
-
     private BaseActivity mActivity;
 
     public ProductAdapter(AidlApi aidlApi, BaseActivity baseActivity) {
@@ -128,51 +51,56 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ItemView
     @Override
     public void setCategory(ProductCategory category) {
         Loger.d("setCategory");
-        Observable.just(category)
-                .map(new Function<ProductCategory, List<Product>>() {
-                    @Override
-                    public List<Product> apply(@NonNull ProductCategory category) throws Exception {
-                        List<Product> dataList = aidlApi.getProductList(category);
-                        fillModeItems = null;
-                        return dataList;
+        Observable.just(category).map(new Function<ProductCategory, List<Product>>() {
+            @Override
+            public List<Product> apply(@NonNull ProductCategory category) throws Exception {
+                List<Product> dataList = aidlApi.getProductList(category);
+                fillModeItems = null;
+                return dataList;
+            }
+        }).map(new Function<List<Product>, List<Product[]>>() {
+            @Override
+            public List<Product[]> apply(@NonNull List<Product> allData) throws Exception {
+                Loger.w("生成页面");
+                List<Product[]> goodsGroupTmp = new ArrayList<>();
+                Loger.d("展示元素size:" + allData.size());
+                int dataListSizeNow = allData.size();
+                int index = 0;
+                //新建数组的大小
+                Product[] group = null;
+                boolean hasNext = false;
+                for (Product item : allData) {
+                    //赋值项到单页数组
+                    if (index == 0) {
+                        //新建单页的大小
+                        int pageSize = dataListSizeNow < GroupSize ? dataListSizeNow : GroupSize;
+                        group = new Product[pageSize];
+                        Loger.d("新建单页的大小:" + pageSize);
                     }
-                })
-                .map(new Function<List<Product>, List<Product[]>>() {
-                    @Override
-                    public List<Product[]> apply(@NonNull List<Product> dataList) throws Exception {
-                        List<Product[]> goodsGroupTmp = new ArrayList<Product[]>();
-                        Loger.d("size:" + dataList.size());
-                        int dataListSizeNow = dataList.size();
-                        int index = 0;
-                        //新建数组的大小
-                        int itemSize = dataListSizeNow < GroupSize ? dataListSizeNow : GroupSize;
-                        Loger.d("初始单页的大小:" + itemSize);
-                        Product[] group = new Product[itemSize];
-                        for (Product item : dataList) {
-                            //赋值项到单页数组
-                            group[index] = item;
-
-                            if (index == group.length - 1) {//到达单页数组最后一项
-                                //添加单页数组
-                                goodsGroupTmp.add(group);
-                                if (fillModeItems == null) {
-                                    fillModeItems = group.clone();
-                                }
-                                //新建单页的大小
-                                itemSize = dataListSizeNow < GroupSize ? dataListSizeNow - 1 : GroupSize;
-                                Loger.d("新建单页的大小:" + itemSize);
-                                group = new Product[itemSize];
-                                index = 0;
-                            } else {
-                                index++;
-                            }
-                            dataListSizeNow--;
+                    group[index] = item;
+                    if (index == group.length - 1) {
+                        //到达单页数组最后一项,添加单页数组
+                        hasNext = false;
+                        goodsGroupTmp.add(group);
+                        if (fillModeItems == null) {
+                            fillModeItems = group.clone();
                         }
-                        return goodsGroupTmp;
+
+                        index = 0;
+                    } else {
+                        index++;
+                        hasNext = true;
                     }
-                })
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io()).subscribe(new ActivityObserver<List<Product[]>>(mActivity) {
+                    dataListSizeNow--;
+                }
+                if (hasNext) {
+                    goodsGroupTmp.add(group);
+                }
+
+                Loger.w("页面大小 " + goodsGroupTmp.size());
+                return goodsGroupTmp;
+            }
+        }).observeOn(AndroidSchedulers.mainThread()).subscribeOn(Schedulers.io()).subscribe(new ActivityObserver<List<Product[]>>(mActivity) {
 
             @Override
             public void onNext(List<Product[]> goodsGroupTmp) {
@@ -191,11 +119,11 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ItemView
 
     @Override
     public ItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        if (AndroidUtils.isScreenOriatationPortrait()){
+        if (AndroidUtils.isScreenOriatationPortrait()) {
             View item = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_goods_grid_port, parent, false);
             item.findViewById(R.id.port).setVisibility(View.VISIBLE);
             return new ItemViewHolder(item);
-        }else {
+        } else {
             View item = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_goods_grid_port, parent, false);
             item.findViewById(R.id.port).setVisibility(View.GONE);
             return new ItemViewHolder(item);
@@ -234,7 +162,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ItemView
         renderGood(holder.b3, goods[8]);
         renderGood(holder.b4, goods[9]);
 
-        if (GroupSize==15){
+        if (GroupSize == 15) {
             renderGood(holder.cb, goods[10]);
             renderGood(holder.c1, goods[11]);
             renderGood(holder.c2, goods[12]);
@@ -242,12 +170,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ItemView
             renderGood(holder.c4, goods[14]);
         }
     }
-
-    public interface SkuDisplayDetailCall {
-        public void show(Product good);
-    }
-
-    SkuDisplayDetailCall call;
 
     public void setSkuDisplayCallBack(SkuDisplayDetailCall call) {
         this.call = call;
@@ -298,11 +220,85 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ItemView
         return goodGroups.size();
     }
 
-    private final static int TYPE_ALL = 2;
-
     @Override
     public int getItemViewType(int position) {
         return TYPE_ALL;
+    }
+
+    public interface SkuDisplayDetailCall {
+        public void show(Product good);
+    }
+
+    class ItemViewHolder extends RecyclerView.ViewHolder {
+        @BindView(R.id.item_a_big)
+        View ab;
+        @BindView(R.id.item_a_small_1)
+        View a1;
+        @BindView(R.id.item_a_small_2)
+        View a2;
+        @BindView(R.id.item_a_small_3)
+        View a3;
+        @BindView(R.id.item_a_small_4)
+        View a4;
+
+        @BindView(R.id.item_b_big)
+        View bb;
+        @BindView(R.id.item_b_small_1)
+        View b1;
+        @BindView(R.id.item_b_small_2)
+        View b2;
+        @BindView(R.id.item_b_small_3)
+        View b3;
+        @BindView(R.id.item_b_small_4)
+        View b4;
+
+        @BindView(R.id.item_c_big)
+        View cb;
+        @BindView(R.id.item_c_small_1)
+        View c1;
+        @BindView(R.id.item_c_small_2)
+        View c2;
+        @BindView(R.id.item_c_small_3)
+        View c3;
+        @BindView(R.id.item_c_small_4)
+        View c4;
+
+        public ItemViewHolder(final View itemView) {
+            super(itemView);
+            ButterKnife.bind(this, itemView);
+            Observable.just(itemView).map(new Function<View, Integer>() {
+                @Override
+                public Integer apply(@NonNull View view) throws Exception {
+                    int width = view.getHeight();
+                    if (AndroidUtils.isScreenOriatationPortrait()) {
+                        width = width * 2 / 3;
+                    }
+                    return width;
+                }
+            }).subscribeOn(AndroidSchedulers.mainThread()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<Integer>() {
+                @Override
+                public void onSubscribe(Disposable d) {
+
+                }
+
+                @Override
+                public void onNext(Integer width) {
+                    ViewGroup.LayoutParams lp = itemView.getLayoutParams();
+                    lp.width = width;
+                    itemView.setLayoutParams(lp);
+                }
+
+                @Override
+                public void onError(Throwable e) {
+
+                }
+
+                @Override
+                public void onComplete() {
+
+                }
+            });
+        }
     }
 
 

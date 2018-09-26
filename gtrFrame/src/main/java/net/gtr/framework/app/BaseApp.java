@@ -49,7 +49,6 @@ public class BaseApp extends Application {
         // 设置是否为上报进程
         CrashReport.UserStrategy strategy = new CrashReport.UserStrategy(context);
         strategy.setUploadProcess(processName == null || processName.equals(packageName));
-        //CrashReport.initCrashReport(getApplicationContext());
         CrashReport.setUserId(SERIAL.toUpperCase());
     }
     /**
